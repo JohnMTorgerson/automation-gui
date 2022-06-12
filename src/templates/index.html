@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automation</title>
+  <link rel="stylesheet" type="text/css" title="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="root">
+    <canvas id="sunlight_canvas" width="{{width}}" height="{{height}}"></canvas>
+  </div>
+  <!-- <script src="main.js" type="text/javascript"></script> -->
+  <script type="text/javascript">
+    var c = document.getElementById("sunlight_canvas");
+    var ctx = c.getContext("2d");
+
+    // draw background gradient
+    {% for row in range(colors|length) %}
+      ctx.beginPath();
+      ctx.moveTo(0, {{row}});
+      ctx.lineTo({{width}}, {{row}});
+      ctx.strokeStyle = "{{colors[row]}}";
+      ctx.stroke();
+    {% endfor %}
+
+    // draw temperature curve
+    let x, y;
+    let lineWidth = 5;
+    let strokeStyle = "rgba(0,0,0,.25)";
+    ctx.beginPath();
+    {% for time in curve_data %}
+      x = {{time}} / (24 * 60 * 60) * {{width}};
+      y = {{height}} - ( {{curve_data[time][0] - warmest}} / {{coldest - warmest}} * {{height}} );
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = strokeStyle;
+      ctx.lineWidth = lineWidth;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    {% endfor %}
+    ctx.lineTo({{width}}, y);
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+
+  </script>
+</body>
+</html>
