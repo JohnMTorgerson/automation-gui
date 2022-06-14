@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunlight Scene</title>
+  <!-- <link rel="stylesheet" type="text/css" title="stylesheet" href="style.css"> -->
+  <script src="{{url_for('static', filename='sunlight.js')}}"></script>
+</head>
+<body>
+  <div id="root">
+    <canvas id="sunlight_canvas" width="{{width}}" height="{{height}}"></canvas>
+  </div>
+  <div id="clock"></div>
+
+  <script type="text/javascript">
+    width = {{width}};
+    height = {{height}};
+    warmest = {{warmest}};
+    coldest = {{coldest}};
+    colors = [];
+    {% for row in range(colors|length) %}
+      colors.push("{{colors[row]}}");
+    {% endfor %}
+  </script>
+</body>
+</html>

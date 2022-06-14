@@ -117,3 +117,5 @@ cs_srgb_custom = ColourSystem(red=xyz_from_xy(0.64, 0.33),
                        green=xyz_from_xy(0.30, 0.60),
                        blue=xyz_from_xy(0.15, 0.06),
                        white=illuminant_LEDB3)
+                       # white=illuminant_D65)
+                       # white=illuminant_A)
