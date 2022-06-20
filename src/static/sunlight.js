@@ -128,7 +128,7 @@ function updateData(data) {
   let textColor = "rgba(255,255,255,.6)"
   let glowColor = 'rgba(255,150,255,.3)';//'rgba(150,255,150,.45)';
   let darkGlowColor = 'rgba(255,150,255,.2)';//'rgba(0,50,0,.13)';
-  let markerHeight = height - relFontSize;
+  let markerHeight = data["current_temp"] > 4500 ? height - relFontSize : relFontSize;
   ctx.beginPath();
   // ctx.moveTo(sunriseX, markerHeight);
   // ctx.lineTo(sunriseX, height);

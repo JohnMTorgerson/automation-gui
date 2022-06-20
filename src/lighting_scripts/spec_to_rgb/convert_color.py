@@ -1,9 +1,13 @@
 # adapted from https://scipython.com/blog/converting-a-spectrum-to-a-colour/
 
 import numpy as np
-from scipy.constants import h, c, k
+# from scipy.constants import h, c, k
 # import matplotlib.pyplot as plt
 # from matplotlib.patches import Circle
+
+h = 6.62607015e-34
+c = 299792458.0
+k = 1.380649e-23
 
 from .colour_system import cs_hdtv
 from .colour_system import cs_smpte
