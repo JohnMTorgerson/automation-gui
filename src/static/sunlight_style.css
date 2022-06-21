@@ -16,7 +16,7 @@
 
 @font-face {
   font-family: 'Twobit';
-  src: url('{{url_for('.static', filename='fonts/Twobit.ttf')}}');
+  src: url('fonts/Twobit.ttf');
 }
 
 @font-face {
@@ -37,6 +37,10 @@
 @font-face {
   font-family: 'AdvancedDot';
   src: url('fonts/advanced_dot_digital-7.ttf');
+}
+
+body {
+  margin: 0px;
 }
 
 
