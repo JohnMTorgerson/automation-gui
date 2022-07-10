@@ -59,10 +59,10 @@ async function updateData(data) {
 
   // y values
   const maxTemp = 87
-  const minTemp = 73
+  const minTemp = 74
   const tempRange = maxTemp - minTemp;
   const maxHum = 41
-  const minHum = 31
+  const minHum = 33
   const humRange = maxHum - minHum;
 
 
@@ -387,6 +387,16 @@ function drawSensorData(ctx, sensorData, startTime, timeRange, minTemp, maxTemp,
     } else if (label.match(/TURNED A\/C on/i)) {
       onPoint = parseInt(key);
     }
+  }
+
+  // if we have an onPoint leftover, then that should mean the A/C is currently on,
+  // so we want to draw that it's on up to the present
+  if (onPoint) {
+    const onX = graphWidth * (onPoint-startTime) / timeRange;
+    const offX = graphWidth;
+    ctx.beginPath();
+    ctx.rect(onX, 0, offX-onX, graphHeight);
+    ctx.fill();
   }
 }
 
