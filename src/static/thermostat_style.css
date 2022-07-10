@@ -1,0 +1,38 @@
+body {
+  margin: 0px;
+  background-color: black;
+}
+
+canvas {
+  /* border: 1px dotted cyan; */
+}
+
+#canvas_container {
+  /* border: 1px solid red; */
+  display:grid;
+  gap: 0px;
+  grid-template-areas: "leftY   graph   rightY"
+                       ".       xLabels .     ";
+}
+
+#graph {
+  grid-area: graph;
+}
+
+#temp_labels {
+  grid-area: leftY;
+}
+
+#hum_labels {
+  grid-area: rightY;
+}
+
+#time_labels {
+  grid-area: xLabels;
+}
+
+#overlay {
+  position:absolute;
+  left:0;
+  top:0;
+}

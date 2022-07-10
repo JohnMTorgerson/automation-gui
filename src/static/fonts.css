@@ -1,0 +1,40 @@
+@font-face {
+  font-family: 'Odyssey';
+  src: url('fonts/1968odyssey.ttf');
+  /* src: url('{{url_for('.static', filename='fonts/1968odyssey.ttf')}}'); */
+}
+
+@font-face {
+  font-family: 'OdysseyHalf';
+  src: url('fonts/1968odysseyhalf.ttf');
+}
+
+@font-face {
+  font-family: 'OdysseyGrad';
+  src: url('fonts/1968odysseygrad.ttf');
+}
+
+@font-face {
+  font-family: 'Twobit';
+  src: url('fonts/Twobit.ttf');
+}
+
+@font-face {
+  font-family: 'Open24';
+  src: url('fonts/Open24.ttf');
+}
+
+@font-face {
+  font-family: 'DeadCRT';
+  src: url('fonts/DEADCRT.ttf');
+}
+
+@font-face {
+  font-family: 'MaximumSecurity';
+  src: url('fonts/MaximumSecurity.ttf');
+}
+
+@font-face {
+  font-family: 'AdvancedDot';
+  src: url('fonts/advanced_dot_digital-7.ttf');
+}

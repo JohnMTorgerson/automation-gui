@@ -3,36 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sunlight Scene</title>
+  <title>Thermostat Scene</title>
 
-  <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='sunlight_style.css')}}">
+  <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='thermostat_style.css')}}">
   <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='fonts.css')}}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
-
-  <script src="{{url_for('static', filename='sunlight.js')}}"></script>
+  <script type="text/javascript">
+    const width = {{width}};
+    const height = {{height}};
+  </script>
 </head>
 <body>
   <div id="root">
     <div id="canvas_container" style="width:{{width}}px; height:{{height}}px;">
-      <canvas id="sunlight_canvas" width="{{width}}" height="{{height}}"></canvas>
-      <div id="clock"></div>
+      <canvas id="temp_labels"></canvas>
+      <canvas id="graph"></canvas>
+      <canvas id="hum_labels"></canvas>
+      <canvas id="time_labels"></canvas>
+    </div>
+    <canvas id="overlay"></canvas>
   </div>
-  </div>
-  <div id="clock"></div>
 
-  <script type="text/javascript">
-    width = {{width}};
-    height = {{height}};
-    warmest = {{warmest}};
-    coldest = {{coldest}};
-    colors = [];
-    {% for row in range(colors|length) %}
-      colors.push("{{colors[row]}}");
-    {% endfor %}
-  </script>
+  <script src="{{url_for('static', filename='thermostat.js')}}"></script>
 </body>
 </html>
