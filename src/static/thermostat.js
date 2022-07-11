@@ -52,7 +52,7 @@ async function updateData(data) {
   }
 
   // x values
-  const hoursRange = 6;
+  const hoursRange = 12;
   const timeRange = 1000 * 60 * 60 * hoursRange;
   const now = new Date();//1657390638260);
   const startTime = now - timeRange;
@@ -266,6 +266,7 @@ function drawHumLabels(ctx, canvas, minHum, maxHum, styles) {
 // draw time labels (x axis)
 function drawTimeLabels(ctx,startTime,now,styles) {
   const timeRange = now - startTime;
+  const hoursRange = timeRange / 1000 / 60 / 60
   const relFontSize = styles.fontSize;
   const y = relFontSize;
   ctx.textAlign = "center";
@@ -282,14 +283,23 @@ function drawTimeLabels(ctx,startTime,now,styles) {
     const x = graphWidth * (i-startTime) / timeRange;
 
     if (minutes%60==0) {
-      ctx.fillStyle = styles.color();
-      ctx.fillText(displayTime, x, y);
+      // there's probably a better/more general way to do this, but for now...
+      // if hoursRange is greater than 'a', only display time every 'b' hours
+      if (
+        (hoursRange < 8) ||
+        (hoursRange >= 8  && hoursRange < 15 && hours%2 == 0) ||
+        (hoursRange >= 15  && hoursRange <= 24 && hours%4 == 0) ||
+        (hoursRange > 24 && hours%12 == 0)
+      ) {
+        ctx.fillStyle = styles.color();
+        ctx.fillText(displayTime, x, y);
+      }
 
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x,styles.tickLength*2);
       ctx.stroke();
-    } else if (minutes%30 == 0) { // display vertical bar for odd hours
+    } else if (minutes%30 == 0 && hoursRange <= 24) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x,styles.tickLength);
