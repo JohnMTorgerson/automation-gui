@@ -333,7 +333,7 @@ function drawSensorData(ctx, sensorData, startTime, timeRange, minTemp, maxTemp,
         // draw hum
         ctx.strokeStyle = humColor;
         ctx.beginPath();
-        if (xLast && humLast) {
+        if (xLast && !isNaN(humLast)) {
           ctx.moveTo(xLast,humLast);
         }
         // drawDataPoint(ctx,x,y);
@@ -345,7 +345,7 @@ function drawSensorData(ctx, sensorData, startTime, timeRange, minTemp, maxTemp,
         // draw temp
         ctx.strokeStyle = tempColor;
         ctx.beginPath();
-        if (xLast && tempLast) {
+        if (xLast && !isNaN(tempLast)) {
           ctx.moveTo(xLast,tempLast);
         }
         // drawDataPoint(ctx,x,y);
