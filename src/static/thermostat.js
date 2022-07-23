@@ -51,18 +51,26 @@ async function updateData(data) {
     return;
   }
 
-  // x values
+  // ----- x values -----
   const hoursRange = 12;
   const timeRange = 1000 * 60 * 60 * hoursRange;
-  const now = new Date();//1657390638260);
+  const now = new Date(1657390638260);
   const startTime = now - timeRange;
 
-  // y values
-  const maxTemp = 87
-  const minTemp = 74
+  // ----- y values -----
+  // first set a manual range for temp and humidity
+  let maxTemp = 87;
+  let minTemp = 74;
+  let maxHum = 41;
+  let minHum = 33;
+  // then expand the ranges as needed based on the values that appear in the data in our time range
+  const valuesRange = findValuesRangeInTimeRange(data.logged_sensor, startTime);
+  minTemp = Math.min(minTemp, Math.floor(valuesRange.temp[0]-1));
+  maxTemp = Math.max(maxTemp, Math.ceil(valuesRange.temp[1]+1));
+  minHum = Math.min(minHum, Math.floor(valuesRange.humidity[0]-1));
+  maxHum = Math.max(maxHum, Math.ceil(valuesRange.humidity[1]+1));
+  // then save the adjusted ranges
   const tempRange = maxTemp - minTemp;
-  const maxHum = 41
-  const minHum = 33
   const humRange = maxHum - minHum;
 
 
@@ -154,7 +162,35 @@ async function updateData(data) {
 
 
 
+function findValuesRangeInTimeRange(sensorData, startTime) {
+  const range = {
+    temp: [Number.POSITIVE_INFINITY,Number.NEGATIVE_INFINITY],
+    humidity: [101, -1]
+  };
 
+  for (const key in sensorData) {
+    const timestamp = parseInt(key);
+
+    // if this entry is within the time range of the graph
+    if (timestamp > startTime) {
+      const temp = parseFloat(sensorData[key].temp);
+      const hum = parseFloat(sensorData[key].humidity);
+
+      if (!isNaN(temp)) {
+        range.temp[0] = Math.min(range.temp[0],temp); // update minimum temp
+        range.temp[1] = Math.max(range.temp[1],temp); // update maximum temp
+      }
+      if (!isNaN(hum)) {
+        range.humidity[0] = Math.min(range.humidity[0],hum); // update minimum temp
+        range.humidity[1] = Math.max(range.humidity[1],hum); // update maximum temp
+      }
+    }
+  }
+
+  console.log(range);
+
+  return range;
+}
 
 
 function drawBG(ctx,canvas) {
@@ -328,8 +364,8 @@ function drawSensorData(ctx, sensorData, startTime, timeRange, minTemp, maxTemp,
   for (const key in sensorData) {
     timestamp = parseInt(key);
 
-    // if this entry is within the time range of the graph (plus a 2 hour buffer so we catch all the data on the edge)
-    if (timestamp > startTime - (1000 * 60 * 60 * 2)) {
+    // if this entry is within the time range of the graph (plus an 8 hour buffer so we catch all the data on the edge)
+    if (timestamp > startTime - (1000 * 60 * 60 * 8)) {
       let time = new Date(timestamp);
       time = `${time.getHours()}:${time.getMinutes()}`;
       console.log(`Time: ${time}`);
