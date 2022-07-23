@@ -14,6 +14,7 @@ const font = "AdvancedDot";
 const font1 = "MaximumSecurity";
 const font2 = "Twobit";
 const font3 = "Odyssey";
+const font4 = "DeadCRT";
 
 const fontSize = height / 20;
 const graphWidth = width - (6*fontSize);//width/height * graphHeight;
@@ -83,9 +84,23 @@ async function updateData(data) {
     "tickLength" : fontSize / 3
   }
 
+  let humStyles = {...labelStyles};
+  humStyles.color = secondaryColor;
+  humStyles.font = font3;
+  humStyles.fontSize = humStyles.fontSize * 1.1; // adjust since we're using a different font
+
+  const currentValueStyles = {
+    "font" : font,
+    "fontSize" : fontSize * 3,
+    "tempColor" : labelStyles.color,
+    "humColor" : humStyles.color
+  }
+
+
 
 
   // ====== DRAW GRAPH ====== //
+
   const graph = document.getElementById("graph");
   graph.width = graphWidth;
   graph.height = graphHeight;
@@ -130,10 +145,6 @@ async function updateData(data) {
   drawBG(humCtx,humLabels);
 
   // draw y axis labels
-  let humStyles = {...labelStyles};
-  humStyles.color = secondaryColor;
-  humStyles.font = font3;
-  humStyles.fontSize = humStyles.fontSize * 1.1; // adjust since we're using a different font
   drawHumLabels(humCtx,humLabels,minHum,maxHum,humStyles);
 
 
@@ -148,6 +159,9 @@ async function updateData(data) {
 
   // draw x axis labels
   drawTimeLabels(timeCtx,startTime,now,labelStyles);
+
+  // ====== DRAW CURRENT VALUE LABELS ====== //
+  drawCurrentValues(graphCtx,data.current,currentValueStyles);
 }
 
 
@@ -463,6 +477,25 @@ function drawSensorData(ctx, sensorData, startTime, timeRange, minTemp, maxTemp,
     ctx.fill();
   }
 }
+
+function drawCurrentValues(ctx,currentValues,styles) {
+  let y = styles.fontSize / 1.5;
+  let x = styles.fontSize / 4;
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.font = `${styles.fontSize}px ${styles.font}`;
+
+  ctx.fillStyle = styles.tempColor(1);
+  ctx.fillText(currentValues.temp_f + "°", x, y);
+
+  x = graphWidth;
+  ctx.textAlign = "right";
+  ctx.fillStyle = styles.humColor(1);
+  ctx.fillText(currentValues.humidity + "%", x, y);
+
+}
+
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
