@@ -54,15 +54,15 @@ async function updateData(data) {
   // ----- x values -----
   const hoursRange = 12;
   const timeRange = 1000 * 60 * 60 * hoursRange;
-  const now = new Date();//1657390638260);
+  const now = new Date();//1658602343136);//1657390638260);
   const startTime = now - timeRange;
 
   // ----- y values -----
-  // first set a manual range for temp and humidity
-  let maxTemp = 87;
-  let minTemp = 74;
-  let maxHum = 41;
-  let minHum = 33;
+  // first set a range based on the thermostat settings for temp and humidity
+  let maxTemp = data.settings.temp_target + 3;//81;
+  let minTemp = data.settings.temp_target - data.settings.temp_hyst - 3;//74;
+  let maxHum = data.settings.hum_target + 3;//41;
+  let minHum = data.settings.hum_target - data.settings.hum_hyst - 3;//34;
   // then expand the ranges as needed based on the values that appear in the data in our time range
   const valuesRange = findValuesRangeInTimeRange(data.logged_sensor, startTime);
   minTemp = Math.min(minTemp, Math.floor(valuesRange.temp[0]-1));
@@ -219,7 +219,12 @@ function drawTempLabels(ctx, canvas, minTemp, maxTemp, styles) {
   // ctx.rect(0, 0, gradWidth, graphHeight);
   // ctx.fill();
 
-  tempRange = maxTemp - minTemp;
+  const tempRange = maxTemp - minTemp;
+
+  const labelModulus = tempRange > 22 ? 10 : (tempRange > 7 ? 5 : 2); // range above 22, labels every 10, 8-22, labels every 5, 6 and under, labels every 2
+  const longTickMod = tempRange > 27 ? 99999999 : (tempRange > 22 ? 5 : 99999999); // range above 27, we'll use small ticks every two, so no long ticks, range 23-27, long ticks every 5, 22 and below, no long ticks
+  const shortTickMod = tempRange > 37 ? 5 : (tempRange > 27 ? 2 : 1); // range above 32, ticks only every 5, above 27, every 2, otherwise, every 1;
+
 
   relFontSize = styles.fontSize;
   ctx.textAlign = "left";
@@ -235,7 +240,7 @@ function drawTempLabels(ctx, canvas, minTemp, maxTemp, styles) {
     // let textY = y + relFontSize/2.7; // stupid adjustment for crappy font baseline
 
     // for(let j=0; j<1; j++) { // the loop here is just to make the shadow darker
-      if(i%5 === 0) {
+      if(i%labelModulus === 0) { // draw numeric label
         ctx.beginPath();
         ctx.moveTo(canvas.width, y);
         ctx.lineTo(canvas.width - styles.tickLength*1.5,y);
@@ -246,7 +251,12 @@ function drawTempLabels(ctx, canvas, minTemp, maxTemp, styles) {
 
         ctx.fillText(`${i}°`, 0, y);
 
-      } else {
+      } else if (i%longTickMod === 0) { // draw long tick
+        ctx.beginPath();
+        ctx.moveTo(canvas.width, y);
+        ctx.lineTo(canvas.width - (styles.tickLength*2),y);
+        ctx.stroke();
+      } else if (i%shortTickMod === 0) { // draw short tick
         ctx.beginPath();
         ctx.moveTo(canvas.width, y);
         ctx.lineTo(canvas.width - styles.tickLength,y);
@@ -263,7 +273,11 @@ function drawTempLabels(ctx, canvas, minTemp, maxTemp, styles) {
 
 // draw humidity labels (y axis)
 function drawHumLabels(ctx, canvas, minHum, maxHum, styles) {
-  humRange = maxHum - minHum;
+  const humRange = maxHum - minHum;
+
+  const labelModulus = humRange > 22 ? 10 : (humRange > 7 ? 5 : 2); // range above 22, labels every 10, 8-22, labels every 5, 6 and under, labels every 2
+  const longTickMod = humRange > 27 ? 99999999 : (humRange > 22 ? 5 : 99999999); // range above 27, we'll use small ticks every two, so no long ticks, range 23-27, long ticks every 5, 22 and below, no long ticks
+  const shortTickMod = humRange > 37 ? 5 : (humRange > 27 ? 2 : 1); // range above 32, ticks only every 5, above 27, every 2, otherwise, every 1;
 
   relFontSize = styles.fontSize;
   ctx.textAlign = "left";
@@ -275,7 +289,7 @@ function drawHumLabels(ctx, canvas, minHum, maxHum, styles) {
     ctx.font = `${relFontSize}px ${styles.font}`;
 
     let y = (1 - (i-minHum)/humRange) * graphHeight;
-    if(i%5 === 0) {
+    if(i%labelModulus === 0) { // draw numeric label
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(styles.tickLength*1.5,y);
@@ -286,8 +300,12 @@ function drawHumLabels(ctx, canvas, minHum, maxHum, styles) {
       const pctFontSize = relFontSize * .6
       ctx.font = `${pctFontSize}px ${font2}`;
       ctx.fillText(`%`, canvas.width - pctFontSize, y);
-
-    } else {
+    } else if (i%longTickMod === 0) { // draw long tick
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(styles.tickLength*2,y);
+      ctx.stroke();
+    } else if (i%shortTickMod === 0) { // draw short tick
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(styles.tickLength,y);
@@ -364,8 +382,8 @@ function drawSensorData(ctx, sensorData, startTime, timeRange, minTemp, maxTemp,
   for (const key in sensorData) {
     timestamp = parseInt(key);
 
-    // if this entry is within the time range of the graph (plus an 8 hour buffer so we catch all the data on the edge)
-    if (timestamp > startTime - (1000 * 60 * 60 * 8)) {
+    // if this entry is within the time range of the graph (plus a 24 hour buffer so we catch all the data on the left edge)
+    if (timestamp > startTime - (1000 * 60 * 60 * 24)) {
       let time = new Date(timestamp);
       time = `${time.getHours()}:${time.getMinutes()}`;
       console.log(`Time: ${time}`);
