@@ -54,7 +54,7 @@ async function updateData(data) {
   // ----- x values -----
   const hoursRange = 12;
   const timeRange = 1000 * 60 * 60 * hoursRange;
-  const now = new Date(1657390638260);
+  const now = new Date();//1657390638260);
   const startTime = now - timeRange;
 
   // ----- y values -----
