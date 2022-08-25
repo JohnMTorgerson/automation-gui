@@ -99,7 +99,7 @@ async function updateData(data) {
 
   const currentValueStyles = {
     "font" : font,
-    "fontSize" : fontSize * 2,
+    "fontSize" : fontSize * 2.5,
     "tempColor" : labelStyles.color,
     "humColor" : humStyles.color
   }
