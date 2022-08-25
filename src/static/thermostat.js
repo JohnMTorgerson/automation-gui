@@ -5,7 +5,7 @@ setInterval(fetchData,10000);
 const backgroundColor = (a) => `rgba(0,0,0,${isNaN(a) ? '1' : a})`;
 const mainColor = (a) => `rgba(50,255,50,${isNaN(a) ? '1' : a})`;
 const secondaryColor = (a) => `rgba(255,50,200,${isNaN(a) ? '.9' : a})`;
-const blueColorAC = (a) => `rgba(100,100,255,${isNaN(a) ? '.3' : a})`;
+const blueColorAC = (a) => `rgba(100,100,255,${isNaN(a) ? '.45' : a})`;
 
 // let numberFont = "Open24";//"Twobit";//"Orbitron";
 // let bigNumberFont = "OdysseyHalf";
@@ -111,6 +111,11 @@ async function updateData(data) {
 
   // semi-transparent pixel effect
   drawOverlay(graphCtx,graph);
+
+  // draw temp and humidity threshold lines (what the thermostat is set to)
+  let opacity = 0.7
+  drawThreshold(graphCtx,data.settings.hum_target,currentValueStyles.humColor(opacity),minHum,maxHum);
+  drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(opacity),minTemp,maxTemp);
 
   // draw sensor data
   drawSensorData(graphCtx,data.logged_sensor,startTime,timeRange,minTemp,maxTemp,minHum,maxHum);
@@ -235,7 +240,7 @@ function drawTempLabels(ctx, canvas, minTemp, maxTemp, styles) {
 
   const tempRange = maxTemp - minTemp;
 
-  const labelModulus = tempRange > 22 ? 10 : (tempRange > 7 ? 5 : 2); // range above 22, labels every 10, 8-22, labels every 5, 6 and under, labels every 2
+  const labelModulus = tempRange > 22 ? 10 : (tempRange > 9 ? 5 : 2); // range above 22, labels every 10, 10-22, labels every 5, 9 and under, labels every 2
   const longTickMod = tempRange > 27 ? 99999999 : (tempRange > 22 ? 5 : 99999999); // range above 27, we'll use small ticks every two, so no long ticks, range 23-27, long ticks every 5, 22 and below, no long ticks
   const shortTickMod = tempRange > 37 ? 5 : (tempRange > 27 ? 2 : 1); // range above 32, ticks only every 5, above 27, every 2, otherwise, every 1;
 
@@ -289,7 +294,7 @@ function drawTempLabels(ctx, canvas, minTemp, maxTemp, styles) {
 function drawHumLabels(ctx, canvas, minHum, maxHum, styles) {
   const humRange = maxHum - minHum;
 
-  const labelModulus = humRange > 22 ? 10 : (humRange > 7 ? 5 : 2); // range above 22, labels every 10, 8-22, labels every 5, 6 and under, labels every 2
+  const labelModulus = humRange > 22 ? 10 : (humRange > 9 ? 5 : 2); // range above 22, labels every 10, 10-22, labels every 5, 9 and under, labels every 2
   const longTickMod = humRange > 27 ? 99999999 : (humRange > 22 ? 5 : 99999999); // range above 27, we'll use small ticks every two, so no long ticks, range 23-27, long ticks every 5, 22 and below, no long ticks
   const shortTickMod = humRange > 37 ? 5 : (humRange > 27 ? 2 : 1); // range above 32, ticks only every 5, above 27, every 2, otherwise, every 1;
 
@@ -382,6 +387,23 @@ function drawTimeLabels(ctx,startTime,now,styles) {
     }
   }
 }
+
+// draw thermostat threshold lines
+function drawThreshold(ctx, threshold, color, minVal, maxVal) {
+  const y = graphHeight * (1 - (threshold - minVal) / (maxVal - minVal));
+  const lineWidth = fontSize/4;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.setLineDash([lineWidth,lineWidth]);
+
+  ctx.beginPath();
+  ctx.moveTo(0,y);
+  ctx.lineTo(graphWidth, y);
+  ctx.stroke();
+
+  ctx.setLineDash([]);
+}
+
 
 function drawSensorData(ctx, sensorData, startTime, timeRange, minTemp, maxTemp, minHum, maxHum) {
   const tempColor = mainColor();
@@ -479,20 +501,25 @@ function drawSensorData(ctx, sensorData, startTime, timeRange, minTemp, maxTemp,
 }
 
 function drawCurrentValues(ctx,currentValues,styles) {
-  let y = styles.fontSize / 1.5;
-  let x = styles.fontSize / 4;
-
-  ctx.textAlign = "left";
   ctx.textBaseline = "top";
   ctx.font = `${styles.fontSize}px ${styles.font}`;
 
-  ctx.fillStyle = styles.tempColor(1);
-  ctx.fillText(currentValues.temp_f + "°", x, y);
+  ctx.shadowColor = backgroundColor(1);
+  ctx.shadowBlur = styles.fontSize / 3.5;
 
-  x = graphWidth;
-  ctx.textAlign = "right";
-  ctx.fillStyle = styles.humColor(1);
-  ctx.fillText(currentValues.humidity + "%", x, y);
+  for (let i=0; i<5; i++) { // just to make the shadows darker
+    let y = styles.fontSize / 1.5;
+    let x = styles.fontSize / 4;
+
+    ctx.textAlign = "left";
+    ctx.fillStyle = styles.tempColor(1);
+    ctx.fillText(currentValues.temp_f + "°", x, y);
+
+    x = graphWidth;
+    ctx.textAlign = "right";
+    ctx.fillStyle = styles.humColor(1);
+    ctx.fillText(currentValues.humidity + "%", x, y);
+  }
 
 }
 
