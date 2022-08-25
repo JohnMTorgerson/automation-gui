@@ -2,6 +2,9 @@
 fetchData();
 setInterval(fetchData,10000);
 
+// set mouse events for touchscreen interaction
+setEvents();
+
 const backgroundColor = (a) => `rgba(0,0,0,${isNaN(a) ? '1' : a})`;
 const mainColor = (a) => `rgba(50,255,50,${isNaN(a) ? '1' : a})`;
 const secondaryColor = (a) => `rgba(255,50,200,${isNaN(a) ? '.9' : a})`;
@@ -25,6 +28,11 @@ const graphHeight = height - (3*fontSize);
 
 //=================================================//
 
+// set mouse events for touchscreen interaction
+function setEvents() {
+  const canvas = document.getElementById("canvas_container");
+  // canvas.
+}
 
 // dynamically load scene data from flask server
 function fetchData() {
@@ -91,7 +99,7 @@ async function updateData(data) {
 
   const currentValueStyles = {
     "font" : font,
-    "fontSize" : fontSize * 3,
+    "fontSize" : fontSize * 2,
     "tempColor" : labelStyles.color,
     "humColor" : humStyles.color
   }
@@ -113,9 +121,8 @@ async function updateData(data) {
   drawOverlay(graphCtx,graph);
 
   // draw temp and humidity threshold lines (what the thermostat is set to)
-  let opacity = 0.7
-  drawThreshold(graphCtx,data.settings.hum_target,currentValueStyles.humColor(opacity),minHum,maxHum);
-  drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(opacity),minTemp,maxTemp);
+  drawThreshold(graphCtx,data.settings.hum_target,currentValueStyles.humColor(0.7),minHum,maxHum);
+  drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(0.6),minTemp,maxTemp);
 
   // draw sensor data
   drawSensorData(graphCtx,data.logged_sensor,startTime,timeRange,minTemp,maxTemp,minHum,maxHum);
@@ -394,7 +401,7 @@ function drawThreshold(ctx, threshold, color, minVal, maxVal) {
   const lineWidth = fontSize/4;
   ctx.strokeStyle = color;
   ctx.lineWidth = lineWidth;
-  ctx.setLineDash([lineWidth,lineWidth]);
+  ctx.setLineDash([lineWidth*1.5,lineWidth*2]);
 
   ctx.beginPath();
   ctx.moveTo(0,y);
@@ -505,7 +512,7 @@ function drawCurrentValues(ctx,currentValues,styles) {
   ctx.font = `${styles.fontSize}px ${styles.font}`;
 
   ctx.shadowColor = backgroundColor(1);
-  ctx.shadowBlur = styles.fontSize / 3.5;
+  ctx.shadowBlur = styles.fontSize / 2;
 
   for (let i=0; i<5; i++) { // just to make the shadows darker
     let y = styles.fontSize / 1.5;
