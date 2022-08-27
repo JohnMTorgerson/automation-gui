@@ -2,8 +2,6 @@
 fetchData();
 setInterval(fetchData,10000);
 
-// set mouse events for touchscreen interaction
-setEvents();
 
 const backgroundColor = (a) => `rgba(0,0,0,${isNaN(a) ? '1' : a})`;
 const mainColor = (a) => `rgba(50,255,50,${isNaN(a) ? '1' : a})`;
@@ -28,11 +26,6 @@ const graphHeight = height - (3*fontSize);
 
 //=================================================//
 
-// set mouse events for touchscreen interaction
-function setEvents() {
-  const canvas = document.getElementById("canvas_container");
-  // canvas.
-}
 
 // dynamically load scene data from flask server
 function fetchData() {

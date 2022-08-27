@@ -18,7 +18,7 @@
   </script>
 </head>
 <body>
-  <div id="root">
+  <div id="root" style="width:{{width}}px; height:{{height}}px;">
     <div id="canvas_container" style="width:{{width}}px; height:{{height}}px;">
       <canvas id="temp_labels"></canvas>
       <canvas id="graph"></canvas>
@@ -26,14 +26,20 @@
       <canvas id="time_labels"></canvas>
     </div>
     <canvas id="overlay"></canvas>
-    <div id="controls">
-      <div id="temp_controls">
-        <div class="current_value"></div>
+    <div id="controls_container" style="width:{{width}}px; height:{{height}}px;">
+      <div id="temp_controls" class="controls">
+        <div class="current">
+          <div class="current_setting"></div>
+          <div class="current_value"></div>
+        </div>
         <div class="button up"></div>
         <div class="button down"></div>
       </div>
-      <div id="hum_controls">
-        <div class="current_value"></div>
+      <div id="hum_controls" class="controls">
+        <div class="current">
+          <div class="current_setting"></div>
+          <div class="current_value"></div>
+        </div>
         <div class="button up"></div>
         <div class="button down"></div>
       </div>
@@ -41,5 +47,6 @@
   </div>
 
   <script src="{{url_for('static', filename='thermostat.js')}}"></script>
+  <script src="{{url_for('static', filename='therm_controls.js')}}"></script>
 </body>
 </html>

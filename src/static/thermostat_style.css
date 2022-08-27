@@ -4,6 +4,10 @@ body {
   cursor: none;
 }
 
+#root {
+  border: 1px dashed gray;
+}
+
 canvas {
   /* border: 1px dotted cyan; */
 }
@@ -36,4 +40,78 @@ canvas {
   position:absolute;
   left:0;
   top:0;
+}
+
+#controls_container {
+  visibility: hidden;
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  background-color: rgba(0,0,0,0.7);
+  font-size: 50px;
+  text-align: center;
+
+  display:flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+#controls_container.show {
+  visibility: visible;
+}
+
+.controls {
+  display:flex;
+  flex-direction:column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+}
+
+#temp_controls {
+  --color: rgba(50,255,50,1);
+  width: 40%;
+  height: 100%;
+}
+
+#hum_controls {
+  --color: rgba(255,50,200,1);
+  width: 40%;
+  height: 100%;
+
+}
+
+
+
+.button {
+  /* display:inline-block; */
+  border-width: 0.15em;
+  border-radius: .5em;
+  border-color: var(--color);
+  border-style: solid;
+  padding: 0.6em;
+}
+
+.button.up::after {
+  display:block;
+  content:'';
+  width: 0;
+  height: 0;
+  border-left: 1em solid transparent;
+  border-right: 1em solid transparent;
+
+  border-bottom: 1em solid var(--color);
+}
+
+.button.down::after {
+  display:block;
+  content:'';
+  width: 0;
+  height: 0;
+  border-left: 1em solid transparent;
+  border-right: 1em solid transparent;
+
+  border-top: 1em solid var(--color);
 }
