@@ -1,6 +1,9 @@
-// fetch data immediately on page load, and then at ten second intervals thereafter
-fetchData();
-setInterval(fetchData,10000);
+import ThermControls from './therm_controls.mjs';
+const thermCtrls = new ThermControls();
+
+// fetch data and save any data changes immediately on page load, and then at ten second intervals thereafter
+fetchAndSaveData();
+setInterval(fetchAndSaveData,10000);
 
 
 const backgroundColor = (a) => `rgba(0,0,0,${isNaN(a) ? '1' : a})`;
@@ -17,10 +20,6 @@ const font2 = "Twobit";
 const font3 = "Odyssey";
 const font4 = "DeadCRT";
 
-const fontSize = height / 20;
-const graphWidth = width - (6*fontSize);//width/height * graphHeight;
-const graphHeight = height - (3*fontSize);
-
 // // draw overlay, a semi-transparent graphic that lies atop the rest of the screen
 // drawOverlay();
 
@@ -28,15 +27,45 @@ const graphHeight = height - (3*fontSize);
 
 
 // dynamically load scene data from flask server
-function fetchData() {
-  console.log('fetching data');
+async function fetchAndSaveData() {
 
+  // first, if a change was made (e.g. the user changed the temp threshold through the UI)
+  // since the server was last polled, we need to update the server with the changes
+  // before getting updated data from it
+  if (thermCtrls.changed) {
+    console.log("control change occurred, sending to server to save to file...")
+
+    // send update to server to save to file
+    const fetchRequest = {
+      cache: "no-cache",
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(thermCtrls.data["settings"])
+    }
+
+    let response = await fetch('/thermostat_control',fetchRequest);
+    if (response.ok) {
+      console.log("...sent to server");
+    } else {
+      console.log(response.status)
+    }
+
+    // change the flag back to false
+    thermCtrls.changed = false;
+  }
+
+
+  // then load data and settings from server
+  console.log('fetching data');
   fetch('/thermostat_update')
   .then(async response => {
     if (response.ok) {
-      let json = await response.json();
+      let data = await response.json();
 
-      updateData(json);
+      updateData(data);
+
     } else {
       // do nothing and just wait until the next interval
       console.log(response.status)
@@ -44,14 +73,21 @@ function fetchData() {
   }).catch(err => {
     console.error(err);
   });
+
+
 }
 
-async function updateData(data) {
+// async function updateData(data) {
+window.updateData = async function (data) {
+  console.log("Updating...");
   console.log(data);
   if (data.error) {
     document.getElementById('root').innerHTML = `Error fetching thermostat data: ${data.error}`;
     return;
   }
+
+  // update thresholds on control screen
+  thermCtrls.updateCtrls(data);
 
   // ----- x values -----
   const hoursRange = 12;
@@ -96,9 +132,6 @@ async function updateData(data) {
     "tempColor" : labelStyles.color,
     "humColor" : humStyles.color
   }
-
-
-
 
   // ====== DRAW GRAPH ====== //
 
@@ -245,7 +278,7 @@ function drawTempLabels(ctx, canvas, minTemp, maxTemp, styles) {
   const shortTickMod = tempRange > 37 ? 5 : (tempRange > 27 ? 2 : 1); // range above 32, ticks only every 5, above 27, every 2, otherwise, every 1;
 
 
-  relFontSize = styles.fontSize;
+  const relFontSize = styles.fontSize;
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
   ctx.fillStyle = styles.color();
@@ -298,7 +331,7 @@ function drawHumLabels(ctx, canvas, minHum, maxHum, styles) {
   const longTickMod = humRange > 27 ? 99999999 : (humRange > 22 ? 5 : 99999999); // range above 27, we'll use small ticks every two, so no long ticks, range 23-27, long ticks every 5, 22 and below, no long ticks
   const shortTickMod = humRange > 37 ? 5 : (humRange > 27 ? 2 : 1); // range above 32, ticks only every 5, above 27, every 2, otherwise, every 1;
 
-  relFontSize = styles.fontSize;
+  const relFontSize = styles.fontSize;
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
   ctx.fillStyle = styles.color();
@@ -416,7 +449,7 @@ function drawSensorData(ctx, sensorData, startTime, timeRange, minTemp, maxTemp,
   let xLast, tempLast, humLast;
   let events = {}; // store event information like "[turned A/C on]";
   for (const key in sensorData) {
-    timestamp = parseInt(key);
+    const timestamp = parseInt(key);
 
     // if this entry is within the time range of the graph (plus a 24 hour buffer so we catch all the data on the left edge)
     if (timestamp > startTime - (1000 * 60 * 60 * 24)) {
@@ -534,7 +567,7 @@ function drawOverlay(ctx,canvas) {
   ctx.lineWidth = lineWidth;
 
 
-  for (i=0; i<canvas.width; i+=lineWidth*2) {
+  for (let i=0; i<canvas.width; i+=lineWidth*2) {
     ctx.beginPath();
     ctx.moveTo(i, 0);
     ctx.lineTo(i,canvas.height);

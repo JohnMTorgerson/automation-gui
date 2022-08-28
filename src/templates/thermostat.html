@@ -15,6 +15,9 @@
   <script type="text/javascript">
     const width = {{width}};
     const height = {{height}};
+    const fontSize = height / 20;
+    const graphWidth = width - (6*fontSize);//width/height * graphHeight;
+    const graphHeight = height - (3*fontSize);
   </script>
 </head>
 <body>
@@ -26,27 +29,31 @@
       <canvas id="time_labels"></canvas>
     </div>
     <canvas id="overlay"></canvas>
-    <div id="controls_container" style="width:{{width}}px; height:{{height}}px;">
+    <div id="controls_container">
       <div id="temp_controls" class="controls">
         <div class="current">
           <div class="current_setting"></div>
           <div class="current_value"></div>
         </div>
-        <div class="button up"></div>
-        <div class="button down"></div>
+        <div class="button_container">
+          <div class="button up"></div>
+          <div class="button down"></div>
+        </div>
       </div>
       <div id="hum_controls" class="controls">
         <div class="current">
           <div class="current_setting"></div>
           <div class="current_value"></div>
         </div>
-        <div class="button up"></div>
-        <div class="button down"></div>
+        <div class="button_container">
+          <div class="button up"></div>
+          <div class="button down"></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <script src="{{url_for('static', filename='thermostat.js')}}"></script>
-  <script src="{{url_for('static', filename='therm_controls.js')}}"></script>
+  <script type="module" src="{{url_for('static', filename='therm_controls.mjs')}}"></script>
+  <script type="module" src="{{url_for('static', filename='thermostat.js')}}"></script>
 </body>
 </html>

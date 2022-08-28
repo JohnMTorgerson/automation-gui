@@ -1,7 +1,7 @@
 body {
   margin: 0px;
   background-color: black;
-  cursor: none;
+  /* cursor: none; */
 }
 
 #root {
@@ -55,7 +55,8 @@ canvas {
 
   display:flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  justify-content: space-between;
+  align-items: flex-end;
 }
 
 #controls_container.show {
@@ -64,28 +65,32 @@ canvas {
 
 .controls {
   display:flex;
-  flex-direction:column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
   gap: 0.2em;
 }
 
 #temp_controls {
   --color: rgba(50,255,50,1);
   --color_faded: rgba(50,255,50,.5);
-  width: 40%;
-  height: 100%;
+  width: 50%;
 }
 
 #hum_controls {
   --color: rgba(255,50,200,1);
   --color_faded: rgba(255,50,200,.5);
-  width: 40%;
-  height: 100%;
-
+  width: 50%;
 }
 
-
+.button_container {
+  display:flex;
+  flex-direction:column;
+  align-items: center;
+  justify-content: center;
+  row-gap: 0.2em;
+  padding-bottom: 0.2em;
+}
 
 .button {
   /* display:inline-block; */
@@ -124,4 +129,17 @@ canvas {
   border-right: 1em solid transparent;
 
   border-top: 1em solid var(--color);
+}
+
+.current {
+  color: var(--color);
+}
+
+#temp_controls .current {
+  order:1; /* to appear on the inside/right of the buttons, for symmetry */
+}
+
+.current_setting {
+  font-family: 'Odyssey';
+  font-size: 2em;
 }

@@ -44,17 +44,67 @@ def thermostat():
     return render_template('thermostat.html', width=width, height=height)
 
 # thermostat scene AJAX data request
-@app.route('/thermostat_update', methods=['POST', 'GET'])
+@app.route('/thermostat_update', methods=['POST','GET'])
 def thermostat_update():
+
     try:
         with open("../../lighting-automation/src/data.json", "r") as f :
             therm_data = json.load(f)["scenes"]["thermostat"]
         results = therm_data
     except Exception as e:
-        results = {"error" : e}
+        print(e)
+        results = {"error" : e.message}
 
     return jsonify(results)
 
+# relay control changes back to the automation controller
+@app.route('/thermostat_control', methods=['POST'])
+def thermostat_control():
+    print("receiving control change from UI, writing to file...")
+    settingsUpdate = request.get_json()
+
+    # first, write settings update to the data.json file that we poll for updates
+    try:
+        with open("../../lighting-automation/src/data.json", "r+") as f :
+            data = json.load(f)
+            data["scenes"]["thermostat"]["settings"] = settingsUpdate
+
+            # delete file contents
+            f.seek(0)
+            f.truncate()
+
+            # write updated data to file
+            json.dump(data, f)
+            print('wrote to data.json')
+
+    except Exception as e:
+        msg = f'Error retrieving/writing thermostat settings to data.json: {e}'
+        print(msg)
+        return msg
+
+    # then, write to the actual thermostat settings file which permanently stores the data
+    # (and is polled by the automation script every time it is run by the cron job)
+    try:
+        with open("../../lighting-automation/src/scenes/basic/thermostat/settings.json", "r+") as f :
+            settings = json.load(f)
+            settings |= settingsUpdate
+
+            # delete file contents
+            f.seek(0)
+            f.truncate()
+
+            # write updated data to file
+            json.dump(settings, f)
+            print('wrote to settings.json')
+
+    except Exception as e:
+        msg = f'Error retrieving/writing thermostat settings to settings.json: {e}'
+        print(msg)
+        return msg
+
+
+
+    return jsonify(settings)
 
 if __name__ == '__main__':
    app.run(debug=True)
