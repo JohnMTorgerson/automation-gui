@@ -109,6 +109,7 @@ canvas {
   box-shadow: 0 0 .5em .05em var(--color);
 }
 
+/* up arrow */
 .button.up::after {
   display:block;
   content:'';
@@ -120,6 +121,7 @@ canvas {
   border-bottom: 1em solid var(--color);
 }
 
+/* down arrow */
 .button.down::after {
   display:block;
   content:'';

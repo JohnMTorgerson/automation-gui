@@ -9,9 +9,9 @@ export default class ThermControls {
   // get json data from lighting-automation;
   // called every update interval by fetchData() in thermostat.js
   updateCtrls(data) {
-    this.data = data;
-    document.querySelector("#temp_controls .current_setting").innerHTML = data.settings.temp_target;
-    document.querySelector("#hum_controls .current_setting").innerHTML = data.settings.hum_target;
+    if (data) this.data = data;
+    document.querySelector("#temp_controls .current_setting").innerHTML = this.data.settings.temp_target;
+    document.querySelector("#hum_controls .current_setting").innerHTML = this.data.settings.hum_target;
 
   }
 
@@ -20,11 +20,15 @@ export default class ThermControls {
     // combine settings change with existing settings
     this.data["settings"] = {...this.data["settings"],...this.ctrlChange}
 
+    // update the controls GUI now instead of waiting for the regular update cycle
+    this.updateCtrls();
+
     // update the UI (in thermostat.js) with the updated data
-    clearTimeout(this.delay);
-    this.delay = setTimeout(() => {
+    // using a small delay to allow multiple presses without a lot of latency
+    clearTimeout(this.saveDelay);
+    this.saveDelay = setTimeout(() => {
       window.parent.updateData(this.data);
-    },300);
+    },400);
 
     // a flag to show that a change was made
     this.changed = true;
@@ -66,6 +70,10 @@ export default class ThermControls {
   showControls(e) {
     const controls = document.getElementById("controls_container");
     controls.classList.add("show");
+
+    // auto hide the controls after so many seconds of inactivity
+    clearTimeout(this.hideDelay);
+    this.hideDelay = setTimeout(this.hideControls,10000);
   }
 
   hideControls(e) {
@@ -76,6 +84,9 @@ export default class ThermControls {
   btnClick(e,prop,amount) {
     e.stopPropagation(); // so that clicking it doesn't hide the controls view
     console.log(`${prop} change by ${amount}`);
+
+    // we call showControls just to reset the hideDelay timer
+    this.showControls();
 
     this.ctrlChange = {};
     this.ctrlChange[prop] = amount + this.data.settings[prop];
