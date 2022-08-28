@@ -67,19 +67,21 @@ canvas {
   display:flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-around;
-  gap: 0.2em;
+  justify-content: space-evenly;
+  /* gap: 0.2em; */
 }
 
 #temp_controls {
   --color: rgba(50,255,50,1);
   --color_faded: rgba(50,255,50,.5);
+  --opacity_factor: .7;
   width: 50%;
 }
 
 #hum_controls {
   --color: rgba(255,50,200,1);
   --color_faded: rgba(255,50,200,.5);
+  --opacity_factor: 1;
   width: 50%;
 }
 
@@ -135,6 +137,7 @@ canvas {
 
 .current {
   color: var(--color);
+  width:2.5em;
 }
 
 #temp_controls .current {
@@ -142,6 +145,14 @@ canvas {
 }
 
 .current_setting {
-  font-family: 'Odyssey';
+  font-family: 'OdysseyGrad';
   font-size: 2em;
+}
+
+.current .units {
+  color: var(--color);
+  opacity: calc(.9 * var(--opacity_factor));
+  font-family: 'AdvancedDot';
+  font-size: .8em;
+  transform: translateX(.22rem); /* to compensate for font weirdness of AdvancedDot font */
 }

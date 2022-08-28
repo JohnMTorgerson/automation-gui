@@ -73,7 +73,7 @@ export default class ThermControls {
 
     // auto hide the controls after so many seconds of inactivity
     clearTimeout(this.hideDelay);
-    this.hideDelay = setTimeout(this.hideControls,10000);
+    this.hideDelay = setTimeout(this.hideControls,30000);
   }
 
   hideControls(e) {

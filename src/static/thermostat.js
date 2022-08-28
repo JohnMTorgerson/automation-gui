@@ -31,6 +31,12 @@ import ThermControls from './therm_controls.mjs';
 
     mouseCounter++;
   });
+  // reset mouseCounter when a click happens, so that incidental movement from multiple touchscreen presses doesn't make the cursor appear
+  document.querySelectorAll(".button").forEach(el => {
+    el.addEventListener("click",(e) => {
+      mouseCounter = 0;
+    });
+  });
 
 
   const backgroundColor = (a) => `rgba(0,0,0,${isNaN(a) ? '1' : a})`;
