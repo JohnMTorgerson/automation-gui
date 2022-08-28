@@ -21,7 +21,10 @@ export default class ThermControls {
     this.data["settings"] = {...this.data["settings"],...this.ctrlChange}
 
     // update the UI (in thermostat.js) with the updated data
-    window.parent.updateData(this.data);
+    clearTimeout(this.delay);
+    this.delay = setTimeout(() => {
+      window.parent.updateData(this.data);
+    },300);
 
     // a flag to show that a change was made
     this.changed = true;
