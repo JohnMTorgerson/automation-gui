@@ -29,7 +29,7 @@ export default class ThermControls {
     clearTimeout(this.saveDelay);
     this.saveDelay = setTimeout(() => {
       window.parent.updateData(this.data);
-    },400);
+    },800);
 
     // a flag to show that a change was made
     this.changed = true;
@@ -59,6 +59,7 @@ export default class ThermControls {
     humLabel.style.top = '0px';
     // humLabel.style.width = (container.offsetWidth - rect.right) + 'px';
     humLabel.style.width = rect.left + 'px';
+    humLabel.style.paddingRight = (container.offsetWidth - rect.right - rect.left) + 'px';
     humLabel.style.lineHeight = rect.left + 'px'; // same as width, because we're using vertical text
     humLabel.style.height = rect.height + 'px';//container.offsetHeight + 'px';
   }
