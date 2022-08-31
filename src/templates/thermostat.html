@@ -19,6 +19,9 @@
     const graphWidth = width - (6*fontSize);//width/height * graphHeight;
     const graphHeight = height - (3*fontSize);
   </script>
+
+  <script type="module" src="{{url_for('static', filename='therm_controls.mjs')}}" defer></script>
+  <script type="module" src="{{url_for('static', filename='thermostat.js')}}" defer></script>
 </head>
 <body>
   <div id="root" style="width:{{width}}px; height:{{height}}px;">
@@ -31,6 +34,7 @@
     <canvas id="overlay"></canvas>
     <div id="controls_container">
       <div id="temp_controls" class="controls">
+        <div class="label">temp</div>
         <div class="current">
           <div class="current_setting"></div>
           <div class="units">deg</div>
@@ -41,6 +45,7 @@
         </div>
       </div>
       <div id="hum_controls" class="controls">
+        <div class="label">humid</div>
         <div class="current">
           <div class="current_setting"></div>
           <div class="units">pct</div>
@@ -52,8 +57,5 @@
       </div>
     </div>
   </div>
-
-  <script type="module" src="{{url_for('static', filename='therm_controls.mjs')}}"></script>
-  <script type="module" src="{{url_for('static', filename='thermostat.js')}}"></script>
 </body>
 </html>

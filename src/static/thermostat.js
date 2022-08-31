@@ -2,6 +2,7 @@ import ThermControls from './therm_controls.mjs';
 
 (function main() {
 
+  setElementSizes();
   const thermCtrls = new ThermControls();
 
   // fetch data and save any data changes immediately on page load, and then at ten second intervals thereafter
@@ -110,6 +111,24 @@ import ThermControls from './therm_controls.mjs';
 
   }
 
+  function setElementSizes() {
+    const graph = document.getElementById("graph");
+    graph.width = graphWidth;
+    graph.height = graphHeight;
+
+    const tempLabels = document.getElementById("temp_labels");
+    tempLabels.width = (width - graphWidth) * 0.4;
+    tempLabels.height = graphHeight;
+
+    const humLabels = document.getElementById("hum_labels");
+    humLabels.width = (width - graphWidth) * 0.6;
+    humLabels.height = graphHeight;
+
+    const timeLabels = document.getElementById("time_labels");
+    timeLabels.width = graphWidth;
+    timeLabels.height = height - graphHeight;
+  }
+
   // async function updateData(data) {
   window.updateData = async function (data) {
     console.log("Updating...");
@@ -169,8 +188,6 @@ import ThermControls from './therm_controls.mjs';
     // ====== DRAW GRAPH ====== //
 
     const graph = document.getElementById("graph");
-    graph.width = graphWidth;
-    graph.height = graphHeight;
     const graphCtx = graph.getContext("2d");
 
     // draw background
@@ -197,8 +214,6 @@ import ThermControls from './therm_controls.mjs';
     // ====== DRAW Y (TEMPERATURE) LABELS ====== //
 
     const tempLabels = document.getElementById("temp_labels");
-    tempLabels.width = (width - graphWidth) * 0.4;
-    tempLabels.height = graphHeight;
     const tempCtx = tempLabels.getContext("2d");
 
     drawBG(tempCtx,tempLabels);
@@ -209,8 +224,6 @@ import ThermControls from './therm_controls.mjs';
     // ====== DRAW Y (HUMIDITY) LABELS ====== //
 
     const humLabels = document.getElementById("hum_labels");
-    humLabels.width = (width - graphWidth) * 0.6;
-    humLabels.height = graphHeight;
     const humCtx = humLabels.getContext("2d");
 
     drawBG(humCtx,humLabels);
@@ -222,8 +235,6 @@ import ThermControls from './therm_controls.mjs';
     // ====== DRAW X LABELS ====== //
 
     const timeLabels = document.getElementById("time_labels");
-    timeLabels.width = graphWidth;
-    timeLabels.height = height - graphHeight;
     const timeCtx = timeLabels.getContext("2d");
 
     drawBG(timeCtx,timeLabels);

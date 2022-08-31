@@ -75,6 +75,7 @@ canvas {
   --color: rgba(50,255,50,1);
   --color_faded: rgba(50,255,50,.5);
   --opacity_factor: .7;
+  --opacity_factor_less: .9;
   width: 50%;
 }
 
@@ -82,6 +83,7 @@ canvas {
   --color: rgba(255,50,200,1);
   --color_faded: rgba(255,50,200,.5);
   --opacity_factor: 1;
+  --opacity_factor_less: 1;
   width: 50%;
 }
 
@@ -156,3 +158,25 @@ canvas {
   font-size: .8em;
   transform: translateX(.22rem); /* to compensate for font weirdness of AdvancedDot font */
 }
+
+.controls .label {
+  color: var(--color);
+  opacity: .7;/* calc(.7 * var(--opacity_factor_less));*/
+  position: absolute;
+  font-family: 'Twobit';
+  font-size: 1.5em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  text-align: right;
+}
+
+/* .controls#temp_controls .label {
+  vertical-align: middle;
+  text-align: right;
+}
+
+.controls#hum_controls .label {
+  vertical-align: middle;
+  text-align: right;
+} */
