@@ -483,6 +483,8 @@ import ThermControls from './therm_controls.mjs';
 
 
   function drawSensorData(ctx, sensorData, startTime, timeRange, minTemp, maxTemp, minHum, maxHum) {
+    // console.log("drawSensorData...");
+
     const tempColor = mainColor();
     const humColor = secondaryColor();
 
@@ -598,6 +600,7 @@ import ThermControls from './therm_controls.mjs';
       ctx.fillText(currentValues.humidity + "%", x, y);
     }
 
+    ctx.shadowColor = 'transparent';
   }
 
 

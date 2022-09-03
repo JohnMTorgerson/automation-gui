@@ -75,7 +75,7 @@ function updateData(data) {
 
   // draw temperature curve
   let x, y;
-  let lineWidth = 5;
+  let lineWidth = 10;
   // let strokeStyle = "rgba(0,0,0,.25)";
   let strokeStyle = "rgba(0,200,0,1)";
 
