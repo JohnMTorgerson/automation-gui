@@ -196,6 +196,9 @@ import ThermControls from './therm_controls.mjs';
     // semi-transparent pixel effect
     drawOverlay(graphCtx,graph);
 
+    // draw event markers (such as A/C on/off)
+    drawEvents(graphCtx,data.logged_sensor,startTime,timeRange)
+
     // draw temp and humidity threshold lines (what the thermostat is set to)
     drawThreshold(graphCtx,data.settings.hum_target,currentValueStyles.humColor(0.7),minHum,maxHum);
     drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(0.6),minTemp,maxTemp);
@@ -467,6 +470,8 @@ import ThermControls from './therm_controls.mjs';
 
   // draw thermostat threshold lines
   function drawThreshold(ctx, threshold, color, minVal, maxVal) {
+    ctx.lineCap = "butt";
+
     const y = graphHeight * (1 - (threshold - minVal) / (maxVal - minVal));
     const lineWidth = fontSize/4;
     ctx.strokeStyle = color;
@@ -493,7 +498,7 @@ import ThermControls from './therm_controls.mjs';
     ctx.lineCap = "round";
     ctx.lineWidth = fontSize/4;
     let xLast, tempLast, humLast;
-    let events = {}; // store event information like "[turned A/C on]";
+    // let events = {}; // store event information like "[turned A/C on]";
     for (const key in sensorData) {
       const timestamp = parseInt(key);
 
@@ -501,13 +506,13 @@ import ThermControls from './therm_controls.mjs';
       if (timestamp > startTime - (1000 * 60 * 60 * 24)) {
         let time = new Date(timestamp);
         time = `${time.getHours()}:${time.getMinutes()}`;
-        console.log(`Time: ${time}`);
+        // console.log(`Time: ${time}`);
         const x = graphWidth * (timestamp-startTime) / timeRange;
         const temp = graphHeight * (1 - (parseFloat(sensorData[key].temp) - minTemp) / tempRange);
         const hum = graphHeight * (1 - (parseFloat(sensorData[key].humidity) - minHum) / humRange);
 
         if (!isNaN(temp) && !isNaN(hum)) {
-          console.log(`x:${x}, tempY:${temp}, humY:${hum}`);
+          // console.log(`x:${x}, tempY:${temp}, humY:${hum}`);
 
           // draw hum
           ctx.strokeStyle = humColor;
@@ -536,35 +541,38 @@ import ThermControls from './therm_controls.mjs';
 
 
         } else {
-          events[key] = sensorData[key].label
+          // events[key] = sensorData[key].label
         }
         // await sleep(200);
       }
     }
 
-    console.log(events);
+  }
 
+  // draw events (such as the A/C turning on or off)
+  function drawEvents(ctx, sensorData, startTime, timeRange) {
     // draw A/C events
     let onPoint;
     ctx.fillStyle = blueColorAC();
-    for (const key in events) {
-      console.log(events[key]);
-      const label = events[key];
+    for (const key in sensorData) {
+      if (sensorData[key].label) {
+        const label = sensorData[key].label;
 
-      // if this event is turning the A/C off, and we've previously saved an onPoint
-      if (onPoint && label.match(/TURNED A\/C off/i)) {
-        // make rectangle
-        const onX = graphWidth * (onPoint-startTime) / timeRange;
-        const offX = graphWidth * (parseInt(key)-startTime) / timeRange;
+        // if this event is turning the A/C off, and we've previously saved an onPoint
+        if (onPoint && label.match(/TURNED A\/C off/i)) {
+          // make rectangle
+          const onX = graphWidth * (onPoint-startTime) / timeRange;
+          const offX = graphWidth * (parseInt(key)-startTime) / timeRange;
 
-        ctx.beginPath();
-        ctx.rect(onX, 0, offX-onX, graphHeight);
-        ctx.fill();
+          ctx.beginPath();
+          ctx.rect(onX, 0, offX-onX, graphHeight);
+          ctx.fill();
 
-        // erase onPoint
-        onPoint = null;
-      } else if (label.match(/TURNED A\/C on/i)) {
-        onPoint = parseInt(key);
+          // erase onPoint
+          onPoint = null;
+        } else if (label.match(/TURNED A\/C on/i)) {
+          onPoint = parseInt(key);
+        }
       }
     }
 
