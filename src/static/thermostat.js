@@ -148,17 +148,26 @@ import ThermControls from './therm_controls.mjs';
     const startTime = now - timeRange;
 
     // ----- y values -----
-    // first set a range based on the thermostat settings for temp and humidity
-    let maxTemp = data.settings.temp_target + 3;//81;
-    let minTemp = data.settings.temp_target - data.settings.temp_hyst - 3;//74;
-    let maxHum = data.settings.hum_target + 3;//41;
-    let minHum = data.settings.hum_target - data.settings.hum_hyst - 3;//34;
+    // set extremum values, to be adjusted below
+    let minTemp = 1000;
+    let maxTemp = -1000;
+    let minHum = 101;
+    let maxHum = -1;
+
+    // if the thermostat is on, set the initial range based on the thermostat settings for temp and humidity
+    if (data.settings.on) {
+      maxTemp = data.settings.temp_target + 3;//81;
+      minTemp = data.settings.temp_target - data.settings.temp_hyst - 3;//74;
+      maxHum = data.settings.hum_target + 3;//41;
+      minHum = data.settings.hum_target - data.settings.hum_hyst - 3;//34;
+    }
+
     // then expand the ranges as needed based on the values that appear in the data in our time range
     const valuesRange = findValuesRangeInTimeRange(data.logged_sensor, startTime);
     minTemp = Math.min(minTemp, Math.floor(valuesRange.temp[0]-1));
-    maxTemp = Math.max(maxTemp, Math.ceil(valuesRange.temp[1]+1));
+    maxTemp = Math.max(maxTemp, Math.ceil(valuesRange.temp[1]+2));
     minHum = Math.min(minHum, Math.floor(valuesRange.humidity[0]-1));
-    maxHum = Math.max(maxHum, Math.ceil(valuesRange.humidity[1]+1));
+    maxHum = Math.max(maxHum, Math.ceil(valuesRange.humidity[1]+2));
     // then save the adjusted ranges
     const tempRange = maxTemp - minTemp;
     const humRange = maxHum - minHum;
@@ -200,8 +209,10 @@ import ThermControls from './therm_controls.mjs';
     drawEvents(graphCtx,data.logged_sensor,startTime,timeRange)
 
     // draw temp and humidity threshold lines (what the thermostat is set to)
-    drawThreshold(graphCtx,data.settings.hum_target,currentValueStyles.humColor(0.7),minHum,maxHum);
-    drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(0.6),minTemp,maxTemp);
+    if (data.settings.on) {
+      drawThreshold(graphCtx,data.settings.hum_target,currentValueStyles.humColor(0.7),minHum,maxHum);
+      drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(0.6),minTemp,maxTemp);
+    }
 
     // draw sensor data
     drawSensorData(graphCtx,data.logged_sensor,startTime,timeRange,minTemp,maxTemp,minHum,maxHum);
@@ -267,11 +278,13 @@ import ThermControls from './therm_controls.mjs';
       humidity: [101, -1]
     };
 
+    let foundOne = false;
     for (const key in sensorData) {
       const timestamp = parseInt(key);
 
       // if this entry is within the time range of the graph
       if (timestamp > startTime) {
+        foundOne = true;
         const temp = parseFloat(sensorData[key].temp);
         const hum = parseFloat(sensorData[key].humidity);
 
@@ -284,6 +297,14 @@ import ThermControls from './therm_controls.mjs';
           range.humidity[1] = Math.max(range.humidity[1],hum); // update maximum temp
         }
       }
+    }
+
+    // if there were no values found in the time range, return some default values
+    // these will only be relevant to determine the y axis view field if there is no data present and the thermostat is off;
+    // otherwise, the sensor data and the threshold values will determine the view field
+    if (!foundOne) {
+      range.temp = [70,80],
+      range.humidity = [40, 50]
     }
 
     console.log(range);

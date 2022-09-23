@@ -11,13 +11,23 @@ export default class ThermControls {
   // called every update interval by fetchData() in thermostat.js
   updateCtrls(data) {
     if (data) this.data = data;
+
+    // update threshold values for temp and humidity
     document.querySelector("#temp_controls .current_setting").innerHTML = this.data.settings.temp_target;
     document.querySelector("#hum_controls .current_setting").innerHTML = this.data.settings.hum_target;
+
+    // make sure the master switch reflects the on/off state
+    const switch_btn = document.querySelector("#onoff_switch");
+    if (this.data.settings.on) {
+      switch_btn.classList.add("on")
+    } else {
+      switch_btn.classList.remove("on")
+    }
 
   }
 
 
-  saveCtrlChange() {
+  saveCtrlChange(delay) {
     // combine settings change with existing settings
     this.data["settings"] = {...this.data["settings"],...this.ctrlChange}
 
@@ -25,11 +35,15 @@ export default class ThermControls {
     this.updateCtrls();
 
     // update the UI (in thermostat.js) with the updated data
-    // using a small delay to allow multiple presses without a lot of latency
+    // using a small delay to allow multiple presses without a lot of latency;
+    // if a delay is not passed or is out of range, use the default below
+    if (isNaN(delay) || delay < 0 || delay > 10000) {
+      delay = 800;
+    }
     clearTimeout(this.saveDelay);
     this.saveDelay = setTimeout(() => {
       window.parent.updateData(this.data);
-    },800);
+    },delay);
 
     // a flag to show that a change was made
     this.changed = true;
@@ -62,6 +76,9 @@ export default class ThermControls {
     humLabel.style.paddingRight = (container.offsetWidth - rect.right - rect.left) + 'px';
     humLabel.style.lineHeight = rect.left + 'px'; // same as width, because we're using vertical text
     humLabel.style.height = rect.height + 'px';//container.offsetHeight + 'px';
+
+    const switch_btn = document.querySelector("#onoff_switch");
+    switch_btn.style.left = (rect.left + rect.width/2) + 'px';
   }
 
   // set mouse events for touchscreen interaction
@@ -84,6 +101,8 @@ export default class ThermControls {
     document.querySelector("#temp_controls .button.down").addEventListener("click", (e) => {this.btnClick(e,'temp_target',-1);});
     document.querySelector("#hum_controls .button.up").addEventListener("click", (e) => {this.btnClick(e,'hum_target',1);});
     document.querySelector("#hum_controls .button.down").addEventListener("click", (e) => {this.btnClick(e,'hum_target',-1);});
+    document.querySelector("#onoff_switch").addEventListener("click", (e) => {this.switchClick(e);});
+
   }
 
   showControls(e) {
@@ -110,6 +129,28 @@ export default class ThermControls {
     this.ctrlChange = {};
     this.ctrlChange[prop] = amount + this.data.settings[prop];
     console.log(`New ${prop}: ${this.ctrlChange[prop]}`);
+    this.saveCtrlChange();
+  }
+
+  // when the user clicks on the master on/off switch
+  switchClick(e) {
+    console.log(this.data.settings.on);
+    e.stopPropagation(); // so that clicking it doesn't hide the controls view
+    this.showControls(); // we call showControls just to reset the hideDelay timer
+
+    const el = e.currentTarget;
+    this.ctrlChange = {};
+
+    if (this.data.settings.on) {
+      // thermostat is on, so we want to turn it off
+      this.ctrlChange["on"] = false;
+      el.classList.remove("on");
+    } else {
+      // thermostat is off, so we want to turn it on
+      this.ctrlChange["on"] = true;
+      el.classList.add("on");
+    }
+
     this.saveCtrlChange();
   }
 }

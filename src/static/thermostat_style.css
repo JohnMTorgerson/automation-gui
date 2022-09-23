@@ -182,3 +182,85 @@ canvas {
   vertical-align: middle;
   text-align: right;
 } */
+
+#onoff_switch {
+  --color: rgba(50,255,50,1);
+  --color_faded: rgba(50,255,50,.5);
+  --bg_color_on: rgba(255,50,200,.5);
+
+  display: block;
+  position:absolute;
+  top: .5em;
+  transform: translateX(-50%);
+}
+
+.switch_outer {
+  --padding: .1em;
+  --height: 1.2em;
+  --width: calc(var(--height) * 2.5);
+  --paddingLeft: calc(var(--width) - var(--height) + var(--padding)); /* when switch is on */
+  height: var(--height);
+  width: var(--width);
+  padding: var(--padding);
+  border-radius: var(--height);
+}
+
+.switch_inner {
+  opacity: .75;
+  height: var(--height);
+  width: var(--height);
+  background-color: var(--color);
+  border-radius: var(--height);
+
+}
+
+/* switching OFF */
+#onoff_switch .switch_outer {
+  animation-duration: .3s;
+  animation-name: switch_off;
+  animation-iteration-count: 1;
+  animation-direction: normal;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+/* switching ON */
+#onoff_switch.on .switch_outer {
+  /* background-color: rgba(255,50,200,.5); */
+  /* padding-left: var(--paddingLeft);
+  width: calc(var(--width) - var(--paddingLeft) + var(--padding)); */
+
+  animation-duration: .3s;
+  animation-name: switch_on;
+  animation-iteration-count: 1;
+  animation-direction: normal;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+
+@keyframes switch_on {
+  from {
+    padding-left: var(--padding);
+    width: var(--width);
+  }
+
+  to {
+    padding-left: var(--paddingLeft);
+    width: calc(var(--width) - var(--paddingLeft) + var(--padding));
+    background-color: var(--bg_color_on);
+  }
+}
+
+@keyframes switch_off {
+  to {
+    padding-left: var(--padding);
+    width: var(--width);
+  }
+
+  from {
+    padding-left: var(--paddingLeft);
+    width: calc(var(--width) - var(--paddingLeft) + var(--padding));
+    background-color: var(--bg_color_on);
+  }
+}
