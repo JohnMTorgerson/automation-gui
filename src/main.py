@@ -6,6 +6,29 @@ app = Flask(__name__)
 width=800
 height=480
 
+
+# ====== MAIN SCREEN ====== #
+@app.route('/')
+def home():
+    # some info for each scene to allow us to display a live widget for each one, which will also serve as a link to its own gui
+    scenes = {
+        "sunlight" : {
+            "route" : '/scenes/sunlight',
+            "update" : '/sunlight_update',
+            "property" : 'current_temp',
+            "bg" : "/static/images/sunlight-icon.png"
+        },
+        "thermostat" : {
+            "route" : '/scenes/thermostat',
+            "update" : '/thermostat_update',
+            "property" : ['current','temp_f'],
+            "bg" : ""
+        }
+    }
+
+    return render_template('home.html', width=width, height=height, scenes=scenes)
+
+
 # ====== SUNLIGHT SCENE ====== #
 
 # sunlight gui route
