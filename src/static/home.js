@@ -2,6 +2,9 @@ import SceneWidget from './scene_widget.mjs';
 
 (function main() {
 
+document.body.style.fontSize = `${fontSize}px`;
+
+
 // create widget objects for each scene
 let widgets = [];
 Object.keys(scenes).forEach((name) => {
@@ -11,8 +14,8 @@ Object.keys(scenes).forEach((name) => {
 });
 
 // create some dummy widgets for testing purposes
-for (let i=0; i<1; i++) {
-  widgets.push(new SceneWidget());
+for (let i=0; i<0; i++) {
+  widgets.push(new SceneWidget(`scene${i}`));
 }
 
 // update the widgets now and at regular intervals hereafter

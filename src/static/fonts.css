@@ -38,3 +38,13 @@
   font-family: 'AdvancedDot';
   src: url('fonts/advanced_dot_digital-7.ttf');
 }
+
+@font-face {
+  font-family: 'Abduction';
+  src: url('fonts/abduction2002.ttf');
+}
+
+@font-face {
+  font-family: 'Unlearned';
+  src: url('fonts/unlearn2.ttf');
+}

@@ -22,7 +22,7 @@ def home():
             "route" : '/scenes/thermostat',
             "update" : '/thermostat_update',
             "property" : ['current','temp_f'],
-            "bg" : ""
+            "bg" : "/static/images/thermostat-icon.png"
         }
     }
 
