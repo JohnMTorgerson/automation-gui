@@ -12,7 +12,7 @@ export default class SceneWidget {
     this.element.id = this.name;
     this.element.classList.add('scene_widget');
     this.element.classList.add('button');
-    this.element.setAttribute("title", this.name.replace(/\b\w/g,l=>l.toUpperCase()));
+    // this.element.setAttribute("title", this.name.replace(/\b\w/g,l=>l.toUpperCase()));
     this.element.style.backgroundImage = `url(${this.bg})`;
     document.getElementById('scenes').appendChild(this.element);
 

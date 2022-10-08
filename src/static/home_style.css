@@ -3,6 +3,7 @@ body {
   color: white;
   margin: 0px;
   cursor: none;
+  user-select: none;
 }
 
 #root {
@@ -126,7 +127,6 @@ body {
 
 .scene_widget {
   --border-rad: 1.5rem;
-  cursor: pointer;
   box-sizing: border-box;
   width: 100%;
   border-radius: var(--border-rad);
