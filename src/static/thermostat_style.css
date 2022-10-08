@@ -43,6 +43,7 @@ canvas {
 }
 
 #controls_container {
+  z-index: 100; /* make sure it's above the nav links (i.e. the link back to the home page, which is at 50) */
   visibility: hidden;
   position:absolute;
   left:0;

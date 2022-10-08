@@ -40,7 +40,7 @@ def sunlight():
     from lighting_scripts import sunlight_graphics as sg
     colors = sg.get_gradient_bg(height,warmest,coldest)
 
-    return render_template('sunlight.html', width=width, height=height, colors=colors, warmest=warmest, coldest=coldest)
+    return render_template('sunlight.html', name="Sunlight", width=width, height=height, colors=colors, warmest=warmest, coldest=coldest)
 
 # sunlight scene AJAX data request
 @app.route('/sunlight_update', methods=['POST', 'GET'])
@@ -64,7 +64,7 @@ def sunlight_update():
 @app.route('/scenes/thermostat')
 def thermostat():
 
-    return render_template('thermostat.html', width=width, height=height)
+    return render_template('thermostat.html', name="Thermostat", width=width, height=height)
 
 # thermostat scene AJAX data request
 @app.route('/thermostat_update', methods=['POST','GET'])

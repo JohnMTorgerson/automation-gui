@@ -1,5 +1,7 @@
 body {
   margin: 0px;
+  cursor: none;
+  user-select: none;
 }
 
 #canvas_container {

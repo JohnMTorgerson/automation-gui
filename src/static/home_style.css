@@ -34,7 +34,8 @@ body {
 
 #top {
   text-align: center;
-  font-family: 'Unlearned';
+  /* font-family: 'Unlearned'; */
+  font-family: "Orbitron";
   /* text-transform: lowercase; */
   color: rgba(50,255,50,1);
   font-size: 1.5em;
@@ -43,6 +44,8 @@ body {
 
 #top h1 {
   margin:0;
+  height:100%;
+  line-height:100%;
 }
 
 #scenes {
@@ -101,7 +104,7 @@ body {
   left: 50%;
   top: 50%;
   transform:  translate(-50%,-50%) scaleY(1);
-  z-index: 100; /* place it above the ::after pseudo-element with the CRT striping */
+  z-index: 20; /* place it above the ::after pseudo-element with the CRT striping */
 
   /* font-size: 3em; */
   font-family: 'AdvancedDot';

@@ -1,0 +1,17 @@
+#nav {
+  display:block;
+  position:absolute;
+  top:0;
+  left:0;
+  height:100%;
+  width:6rem;
+  z-index: 50; /* place it above main content, but below popup panels (e.g. thermostat controls), which go at 100 */
+}
+
+a#nav:hover {
+  /* some kind of nice animation should happen */
+}
+
+a#nav:active {
+  /* some kind of nice animation should happen */
+}

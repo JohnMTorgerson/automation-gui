@@ -1,16 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thermostat Scene</title>
+{% extends "scene.html" %}
 
+{% block head %}
+  {{ super() }}
   <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='thermostat_style.css')}}">
-  <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='fonts.css')}}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script type="module" src="{{url_for('static', filename='therm_controls.mjs')}}" defer></script>
+  <script type="module" src="{{url_for('static', filename='thermostat.js')}}" defer></script>
 
   <script type="text/javascript">
     const width = {{width}};
@@ -19,13 +13,9 @@
     const graphWidth = width - (6*fontSize);//width/height * graphHeight;
     const graphHeight = height - (3*fontSize);
   </script>
+{% endblock %}
 
-  <script type="module" src="{{url_for('static', filename='all.js')}}" defer></script>
-  <script type="module" src="{{url_for('static', filename='therm_controls.mjs')}}" defer></script>
-  <script type="module" src="{{url_for('static', filename='thermostat.js')}}" defer></script>
-</head>
-<body>
-  <div id="root" style="width:{{width}}px; height:{{height}}px;">
+{% block content %}
     <div id="canvas_container" style="width:{{width}}px; height:{{height}}px;">
       <canvas id="temp_labels"></canvas>
       <canvas id="graph"></canvas>
@@ -62,6 +52,4 @@
         </div>
       </div>
     </div>
-  </div>
-</body>
-</html>
+{% endblock %}
