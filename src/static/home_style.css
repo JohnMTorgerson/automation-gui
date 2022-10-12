@@ -9,7 +9,7 @@ body {
 /* chromatic aberration text effect */
 .chromaberFX {
   --widthFac: 1.5;
-  --opacityFac: .8;
+  --opacityFac: 1;
 
   /* text-shadow: -.2em 0em 0em magenta, .2em 0em 0em green; */
   text-shadow: calc(-.03em * var(--widthFac)) -.005em .03em rgba(255, 255, 100, calc(.4 * var(--opacityFac))), /* yellow */
@@ -49,7 +49,7 @@ body {
   /* font-family: 'Unlearned'; */
   font-family: "WarGames";
   /* text-transform: lowercase; */
-  color: rgba(50,255,50,1);
+  color: rgba(30,220,30,.8);
   font-size: 1.5em;
   z-index: 0;
 }
