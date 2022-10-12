@@ -9,21 +9,33 @@ body {
 }
 
 #clock {
+  opacity: .5;
+
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
 
-  font-family: 'OdysseyGrad';
-  font-size: 200px;
+  font-family: 'OdysseyHalf';
+  font-size: 170px;
 
-  /* color: rgba(255,255,255,.7);
-  text-shadow:  0px 0px .5em rgba(0,0,0,.8),
-                0px 0px .03em rgba(0,30,0,.5),
-                0px 0px .05em rgba(150,230,150,1); */
 
-  color: rgba(0,0,120,.2);
-  text-shadow: -.05em .008em .01em rgba(120,210,150,.2),
+  /* background: linear-gradient(180deg, rgba(255,255,255,1) 55%, rgba(255,50,255,1) 80%);
+  background-clip: text;
+  color: transparent; */
+
+
+  color: rgba(255,255,255,1);
+  text-shadow:
+                0px 0px .02em rgba(0,0,0,1),
+                0px 0px .03em rgba(0,0,0,1),
+                0px 0px .05em rgba(0,70,0,.8),
+                0px 0px .1em rgba(150,255,150,1),
+                0px 0px .1em rgba(0,0,0,.8),
+                0px 0px .5em rgba(0,0,0,1);
+
+  /* color: rgba(0,0,120,.5); */
+  /* text-shadow: -.05em .008em .01em rgba(120,210,150,.2),
                .06em -.008em .02em rgba(100,155,100,.2),
-               .03em -.005em .01em rgba(200,50,200,.2);
+               .03em -.005em .01em rgba(200,50,200,.2); */
 }

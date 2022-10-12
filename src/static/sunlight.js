@@ -36,11 +36,11 @@ function updateData(data) {
   // options
   let fontSize = height / 20; // set main fontSize for text labels
   let font = "Helvetica";
-  let numberFont = "Open24";//"Twobit";//"Orbitron";
+  let numberFont = "WarGames";//"Open24";//"Twobit";//"Orbitron";
   let bigNumberFont = "OdysseyHalf";
   let biggerNumberFont = "OdysseyGrad";
   let tempFont = "Twobit";
-  let tempFont1 = "AdvancedDot";
+  let tempFont1 = "WarGames";
 
   let now = worldTime;
   if (!(now instanceof Date) || isNaN(now)) {
@@ -77,7 +77,7 @@ function updateData(data) {
   let x, y;
   let lineWidth = 10;
   // let strokeStyle = "rgba(0,0,0,.25)";
-  let strokeStyle = "rgba(0,200,0,1)";
+  let strokeStyle = "rgba(0,255,0,1)";
 
   ctx.beginPath();
   for (let [time, values] of Object.entries(data["sunlight_curve"])) {
@@ -125,7 +125,7 @@ function updateData(data) {
   ssTimeStr = `${ssTimeStr.getHours()}:${ssTimeStr.getMinutes().toString().replace(/.*/,(m) => m < 10 ? '0' + m : m)}`;
   ctx.lineWidth = relFontSize / 6;
   let markerColor = "rgba(215,215,255,.8)"
-  let textColor = "rgba(255,255,255,.6)"
+  let textColor = "rgba(255,255,255,1)"
   let glowColor = 'rgba(255,150,255,.3)';//'rgba(150,255,150,.45)';
   let darkGlowColor = 'rgba(255,150,255,.2)';//'rgba(0,50,0,.13)';
   let markerHeight = data["current_temp"] > 4500 ? height - relFontSize : relFontSize;
@@ -159,11 +159,11 @@ function updateData(data) {
 
 
   // draw time labels (x axis)
-  relFontSize = fontSize * .8;
+  relFontSize = fontSize * 1.5;
   y = height - relFontSize/2;
   for (let i=1; i<24; i+=0.5) {
     let x = i * width / 24;
-    let mainStyle = x < sunriseX || x > sunsetX ? "rgba(250,230,200,.6)" : "rgba(0,0,0,.9)";
+    let mainStyle = x < sunriseX || x > sunsetX ? "rgba(250,230,200,1)" : "rgba(0,0,0,.9)";
     let fadeStyle = x < sunriseX || x > sunsetX ? "rgba(250,230,200,.4)" : "rgba(0,0,0,.4)";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -183,8 +183,8 @@ function updateData(data) {
   }
 
   // draw temp labels (y axis)
-  relFontSize = fontSize * .8;
-  mainStyle = "rgba(250,230,200,.6)";
+  relFontSize = fontSize * 1.7;
+  mainStyle = "rgba(250,230,200,1)";
   fadeStyle = "rgba(250,230,200,.4)";
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
@@ -192,9 +192,9 @@ function updateData(data) {
   ctx.font = `${relFontSize}px ${tempFont1}`;
   for (let i=Math.ceil(warmest/1000)*1000 + 100; i<coldest; i+=100) {
     let y = (1-(i-warmest)/(coldest-warmest)) * height;
-    y = y + relFontSize/2.7; // stupid adjustment for crappy font baseline
+    // y = y + relFontSize/2.7; // stupid adjustment for crappy font baseline
 
-    if(i%500 === 0) {
+    if(i%1000 === 0) {
       // ctx.beginPath();
       // ctx.moveTo(0, y);
       // ctx.lineTo(width, y);
@@ -202,11 +202,14 @@ function updateData(data) {
       // ctx.strokeStyle = `red`;
       // ctx.stroke();
 
-      ctx.fillText('\u2013', 0 - relFontSize/9, y); // stupid fucking line because the em-dash is barely longer than the en-dash so we have to use two en-dashes instead
-      ctx.fillText('\u2013' + i + 'K', relFontSize/2, y);
+      // ctx.fillText('\u2013', 0 - relFontSize/9, y); // stupid fucking line because the em-dash is barely longer than the en-dash so we have to use two en-dashes instead
+      ctx.fillText(`\u2014${i}K`, 0, y);
+    } else if (i%500 === 0) {
+      ctx.fillText('\u2014', 0, y);
     } else {
       // ctx.font = `${relFontSize}px ${tempFont1}`;
-      ctx.fillText('\u2013', 0, y);
+      // ctx.fillText('\u2013', 0, y);
+      ctx.fillText('-', 0, y);
     }
   }
   ctx.textBaseline = "alphabetic";
@@ -240,7 +243,7 @@ function updateData(data) {
   ctx.fill();
 
   // display current temp in text
-  relFontSize = fontSize * 1.5
+  relFontSize = fontSize * 2.5;
   ctx.font = `${relFontSize}px ${tempFont}`;
   ctx.textAlign = "right";
   // ctx.fillStyle = "rgba(255,200,240,.6)";

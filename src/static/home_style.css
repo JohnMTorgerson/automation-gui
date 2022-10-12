@@ -49,7 +49,7 @@ body {
   /* font-family: 'Unlearned'; */
   font-family: "WarGames";
   /* text-transform: lowercase; */
-  color: rgba(30,220,30,.8);
+  color: rgba(20,200,20,1);
   font-size: 1.5em;
   z-index: 0;
 }
