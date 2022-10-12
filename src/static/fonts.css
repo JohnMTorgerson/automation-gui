@@ -48,3 +48,8 @@
   font-family: 'Unlearned';
   src: url('fonts/unlearn2.ttf');
 }
+
+@font-face {
+  font-family: 'WarGames';
+  src: url('fonts/WarGames-Regular-20221012.woff');
+}
