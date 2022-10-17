@@ -1,0 +1,19 @@
+{% extends "scene.html" %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='clock_style.css')}}">
+  <script type="module" src="{{url_for('static', filename='clock.js')}}" defer></script>
+
+  <script type="text/javascript">
+    const width = {{width}};
+    const height = {{height}};
+    const fontSize = height / 20;
+  </script>
+{% endblock %}
+
+{% block content %}
+    <div id="container" style="width:{{width}}px; height:{{height}}px;">
+      <div id="clock"></div>
+    </div>
+{% endblock %}

@@ -1,5 +1,6 @@
 from flask import Flask, render_template, url_for, request, jsonify
 from pprint import pprint
+import datetime
 import json
 app = Flask(__name__)
 
@@ -23,7 +24,13 @@ def home():
             "update" : '/thermostat_update',
             "property" : ['current','temp_f'],
             "bg" : "/static/images/thermostat-icon.png"
-        }
+        },
+        "clock" : {
+            "route" : '/scenes/clock',
+            "update" : '/clock_update',
+            "property" : 'time',
+            "bg" : ""
+        },
     }
 
     return render_template('home.html', width=width, height=height, scenes=scenes)
@@ -128,6 +135,22 @@ def thermostat_control():
 
 
     return jsonify(settings)
+
+# ====== CLOCK SCENE ====== #
+
+# clock gui route
+@app.route('/scenes/clock')
+def clock():
+    return render_template('clock.html', name="Clock", width=width, height=height)
+
+# clock scene AJAX data request
+@app.route('/clock_update', methods=['POST','GET'])
+def clock_update():
+    now = datetime.datetime.now()
+    time = f"{now.hour:02d}:{now.minute:02d}"
+
+    return jsonify({"time" : time})
+
 
 if __name__ == '__main__':
    app.run(debug=True)

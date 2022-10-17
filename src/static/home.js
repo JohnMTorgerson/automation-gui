@@ -7,7 +7,7 @@ document.body.style.fontSize = `${fontSize}px`;
 
 // create widget objects for each scene
 let widgets = [];
-Object.keys(scenes).forEach((name) => {
+Object.keys(scenes).sort().forEach((name) => {
   const scene = scenes[name];
   const widget = new SceneWidget(name,scene.route,scene.update,scene.property,scene.bg);
   widgets.push(widget);

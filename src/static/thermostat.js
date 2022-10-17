@@ -11,8 +11,11 @@ import ThermControls from './therm_controls.mjs';
 
 
   const backgroundColor = (a) => `rgba(0,0,0,${isNaN(a) ? '1' : a})`;
-  const mainColor = (a) => `rgba(50,255,50,${isNaN(a) ? '1' : a})`;
-  const secondaryColor = (a) => `rgba(255,50,200,${isNaN(a) ? '.9' : a})`;
+  const mainColor = (a) => `rgba(50,255,50,${isNaN(a) ? '1' : a})`; // green
+  const secondaryColor = (a) => `rgba(255,50,200,${isNaN(a) ? '.9' : a})`; // magenta
+  const tertiaryColor = (a) => `rgba(255,220,50,${isNaN(a) ? '1' : a})`; // yellow
+  const quaternaryColor = (a) => `rgba(200,50,255,${isNaN(a) ? '1' : a})`; // purple
+
   const blueColorAC = (a) => `rgba(100,100,255,${isNaN(a) ? '.45' : a})`;
 
   // let numberFont = "Open24";//"Twobit";//"Orbitron";
@@ -119,10 +122,15 @@ import ThermControls from './therm_controls.mjs';
 
     // ----- y values -----
     // set extremum values, to be adjusted below
-    let minTemp = 1000;
-    let maxTemp = -1000;
-    let minHum = 101;
-    let maxHum = -1;
+    let minTempExtreme = 1000;
+    let maxTempExtreme = -1000;
+    let minHumExtreme = 101;
+    let maxHumExtreme = -1;
+    let minTemp = minTempExtreme;
+    let maxTemp = maxTempExtreme;
+    let minHum = minHumExtreme;
+    let maxHum = maxHumExtreme;
+
 
     // if the thermostat is on, set the initial range based on the thermostat settings for temp and humidity
     if (data.settings.on) {
@@ -133,14 +141,33 @@ import ThermControls from './therm_controls.mjs';
     }
 
     // then expand the ranges as needed based on the values that appear in the data in our time range
-    const valuesRange = findValuesRangeInTimeRange(data.logged_sensor, startTime);
-    minTemp = Math.min(minTemp, Math.floor(valuesRange.temp[0]-1));
-    maxTemp = Math.max(maxTemp, Math.ceil(valuesRange.temp[1]+2));
-    minHum = Math.min(minHum, Math.floor(valuesRange.humidity[0]-1));
-    maxHum = Math.max(maxHum, Math.ceil(valuesRange.humidity[1]+2));
+    let tempRange = findValuesRangeInTimeRange(data.logged_sensor, "temp", startTime);
+    minTemp = Math.min(minTemp, Math.floor(tempRange.min-1));
+    maxTemp = Math.max(maxTemp, Math.ceil(tempRange.max+2));
+    let humRange = findValuesRangeInTimeRange(data.logged_sensor, "humidity", startTime);
+    minHum = Math.min(minHum, Math.floor(humRange.min-1));
+    maxHum = Math.max(maxHum, Math.ceil(humRange.max+2));
+
+    // then expand again as needed based on weather data
+    // if we're showing the weather data on the graph
+    if (data.settings.show_weather_graph) {
+      tempRange = findValuesRangeInTimeRange(data.logged_weather, "Temperature (degrees F)", startTime);
+      minTemp = Math.min(minTemp, Math.floor(tempRange.min-1));
+      maxTemp = Math.max(maxTemp, Math.ceil(tempRange.max+2));
+      humRange = findValuesRangeInTimeRange(data.logged_weather, "Relative Humidity (%)", startTime);
+      minHum = Math.min(minHum, Math.floor(humRange.min-1));
+      maxHum = Math.max(maxHum, Math.ceil(humRange.max+2));
+    }
+
+    // set defaults in case there is no data at all
+    if (minTemp === minTempExtreme) minTemp = 68;
+    if (maxTemp === maxTempExtreme) maxTemp = 82;
+    if (minHum === minHumExtreme) minHum = 38;
+    if (maxHum === maxHumExtreme) maxHum = 52;
+
     // then save the adjusted ranges
-    const tempRange = maxTemp - minTemp;
-    const humRange = maxHum - minHum;
+    tempRange = maxTemp - minTemp;
+    humRange = maxHum - minHum;
 
 
     // label styles
@@ -182,6 +209,11 @@ import ThermControls from './therm_controls.mjs';
     if (data.settings.on) {
       drawThreshold(graphCtx,data.settings.hum_target,currentValueStyles.humColor(0.7),minHum,maxHum);
       drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(0.6),minTemp,maxTemp);
+    }
+
+    // only show weather data if the setting is set to true
+    if (data.settings.show_weather_graph) {
+      drawWeatherData(graphCtx,data.logged_weather,startTime,timeRange,minTemp,maxTemp,minHum,maxHum)
     }
 
     // draw sensor data
@@ -242,40 +274,35 @@ import ThermControls from './therm_controls.mjs';
 
 
 
-  function findValuesRangeInTimeRange(sensorData, startTime) {
+  function findValuesRangeInTimeRange(data, key, startTime) {
     const range = {
-      temp: [Number.POSITIVE_INFINITY,Number.NEGATIVE_INFINITY],
-      humidity: [101, -1]
+      min: Number.POSITIVE_INFINITY,
+      max: Number.NEGATIVE_INFINITY
     };
 
     let foundOne = false;
-    for (const key in sensorData) {
-      const timestamp = parseInt(key);
+    for (const timestring in data) {
+      const timestamp = parseInt(timestring);
 
       // if this entry is within the time range of the graph
       if (timestamp > startTime) {
         foundOne = true;
-        const temp = parseFloat(sensorData[key].temp);
-        const hum = parseFloat(sensorData[key].humidity);
+        const value = parseFloat(data[timestring][key]);
 
-        if (!isNaN(temp)) {
-          range.temp[0] = Math.min(range.temp[0],temp); // update minimum temp
-          range.temp[1] = Math.max(range.temp[1],temp); // update maximum temp
-        }
-        if (!isNaN(hum)) {
-          range.humidity[0] = Math.min(range.humidity[0],hum); // update minimum temp
-          range.humidity[1] = Math.max(range.humidity[1],hum); // update maximum temp
+        if (!isNaN(value)) {
+          range.min = Math.min(range.min,value); // update minimum temp
+          range.max = Math.max(range.max,value); // update maximum temp
         }
       }
     }
 
-    // if there were no values found in the time range, return some default values
-    // these will only be relevant to determine the y axis view field if there is no data present and the thermostat is off;
-    // otherwise, the sensor data and the threshold values will determine the view field
-    if (!foundOne) {
-      range.temp = [70,80],
-      range.humidity = [40, 50]
-    }
+    // // if there were no values found in the time range, return some default values
+    // // these will only be relevant to determine the y axis view field if there is no data present and the thermostat is off;
+    // // otherwise, the sensor data and the threshold values will determine the view field
+    // if (!foundOne) {
+    //   range.min = 30;
+    //   range.max = 80;
+    // }
 
     console.log(range);
 
@@ -539,6 +566,73 @@ import ThermControls from './therm_controls.mjs';
     }
 
   }
+
+  function drawWeatherData(ctx, weatherData, startTime, timeRange, minTemp, maxTemp, minHum, maxHum) {
+    // console.log("drawSensorData...");
+    const lineWidth = fontSize/4;
+    ctx.setLineDash([0,lineWidth*2]);
+    ctx.lineCap = "round";
+    ctx.lineWidth = lineWidth;
+
+    const tempColor = mainColor(.8);
+    const humColor = secondaryColor(.8);
+
+    const tempRange = maxTemp - minTemp;
+    const humRange = maxHum - minHum;
+    let xLast, tempLast, humLast;
+    // let events = {}; // store event information like "[turned A/C on]";
+    for (const key in weatherData) {
+      const timestamp = parseInt(key);
+
+      // if this entry is within the time range of the graph (plus a 24 hour buffer so we catch all the data on the left edge)
+      if (timestamp > startTime - (1000 * 60 * 60 * 24)) {
+        let time = new Date(timestamp);
+        time = `${time.getHours()}:${time.getMinutes()}`;
+        // console.log(`Time: ${time}`);
+        const x = graphWidth * (timestamp-startTime) / timeRange;
+        const temp = graphHeight * (1 - (parseFloat(weatherData[key]["Temperature (degrees F)"]) - minTemp) / tempRange);
+        const hum = graphHeight * (1 - (parseFloat(weatherData[key]["Relative Humidity (%)"]) - minHum) / humRange);
+
+        if (!isNaN(temp) && !isNaN(hum)) {
+          // console.log(`x:${x}, tempY:${temp}, humY:${hum}`);
+
+          // draw hum
+          ctx.strokeStyle = humColor;
+          ctx.beginPath();
+          if (xLast && !isNaN(humLast)) {
+            ctx.moveTo(xLast,humLast);
+          }
+          // drawDataPoint(ctx,x,y);
+          ctx.lineTo(x, hum);
+          ctx.stroke();
+          humLast = hum;
+
+
+          // draw temp
+          ctx.strokeStyle = tempColor;
+          ctx.beginPath();
+          if (xLast && !isNaN(tempLast)) {
+            ctx.moveTo(xLast,tempLast);
+          }
+          // drawDataPoint(ctx,x,y);
+          ctx.lineTo(x, temp);
+          ctx.stroke();
+          tempLast = temp;
+
+          xLast = x;
+
+
+        } else {
+          // events[key] = sensorData[key].label
+        }
+        // await sleep(200);
+      }
+    }
+
+    ctx.setLineDash([]);
+
+  }
+
 
   // draw events (such as the A/C turning on or off)
   function drawEvents(ctx, sensorData, startTime, timeRange) {

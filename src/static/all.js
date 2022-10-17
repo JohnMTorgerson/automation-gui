@@ -14,13 +14,21 @@
     // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/mozInputSource
     if (mouseCounter > 10) {
       document.body.style.cursor = "default";
-      document.querySelector("#nav").style.cursor = "pointer";
+      try {
+        document.querySelector("#nav").style.cursor = "pointer";
+      } catch {
+        // do nothing
+      }
     }
 
     clearTimeout(mouseTimer);
     mouseTimer = setTimeout(() => {
       document.body.style.cursor = "none";
-      document.querySelector("#nav").style.cursor = "none";
+      try {
+        document.querySelector("#nav").style.cursor = "none";
+      } catch {
+        // do nothing
+      }
       // document.body.style.setProperty("cursor", "none", "important");
       mouseCounter = 0;
     },2000)
