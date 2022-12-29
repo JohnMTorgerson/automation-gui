@@ -14,7 +14,7 @@ export default class ThermControls {
 
     // update threshold values for temp and humidity
     document.querySelector("#temp_controls .current_setting").innerHTML = this.data.settings.temp_target;
-    document.querySelector("#hum_controls .current_setting").innerHTML = this.data.settings.hum_target;
+    document.querySelector("#hum_controls .current_setting").innerHTML = this.data.settings.hum_max;
 
     // make sure the master switch reflects the on/off state
     const switch_btn = document.querySelector("#onoff_switch");
@@ -99,8 +99,8 @@ export default class ThermControls {
     // control buttons
     document.querySelector("#temp_controls .button.up").addEventListener("click", (e) => {this.btnClick(e,'temp_target',1);});
     document.querySelector("#temp_controls .button.down").addEventListener("click", (e) => {this.btnClick(e,'temp_target',-1);});
-    document.querySelector("#hum_controls .button.up").addEventListener("click", (e) => {this.btnClick(e,'hum_target',1);});
-    document.querySelector("#hum_controls .button.down").addEventListener("click", (e) => {this.btnClick(e,'hum_target',-1);});
+    document.querySelector("#hum_controls .button.up").addEventListener("click", (e) => {this.btnClick(e,'hum_max',1);});
+    document.querySelector("#hum_controls .button.down").addEventListener("click", (e) => {this.btnClick(e,'hum_max',-1);});
     document.querySelector("#onoff_switch").addEventListener("click", (e) => {this.switchClick(e);});
 
   }
