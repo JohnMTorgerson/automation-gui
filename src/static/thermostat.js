@@ -26,6 +26,7 @@ import ThermControls from './therm_controls.mjs';
   const font2 = "Twobit";
   const font3 = "Odyssey";
   const font4 = "DeadCRT";
+  const font5 = "WarGames";
 
   // // draw overlay, a semi-transparent graphic that lies atop the rest of the screen
   // drawOverlay();
@@ -136,8 +137,8 @@ import ThermControls from './therm_controls.mjs';
     if (data.settings.on) {
       maxTemp = data.settings.temp_target + 3;//81;
       minTemp = data.settings.temp_target - data.settings.temp_hyst - 3;//74;
-      maxHum = data.settings.hum_target + 3;//41;
-      minHum = data.settings.hum_target - data.settings.hum_hyst - 3;//34;
+      maxHum = data.settings.hum_max + 3;//41;
+      minHum = data.settings.hum_max - data.settings.hum_hyst - 3;//34;
     }
 
     // then expand the ranges as needed based on the values that appear in the data in our time range
@@ -191,6 +192,13 @@ import ThermControls from './therm_controls.mjs';
       "humColor" : humStyles.color
     }
 
+    const weatherStyles = {
+      "font" : font2,
+      "fontSize" : fontSize * 2.5,
+      "tempColor" : mainColor(.4),
+      "humColor" : secondaryColor(.4)
+    }
+
     // ====== DRAW GRAPH ====== //
 
     const graph = document.getElementById("graph");
@@ -207,7 +215,7 @@ import ThermControls from './therm_controls.mjs';
 
     // draw temp and humidity threshold lines (what the thermostat is set to)
     if (data.settings.on) {
-      drawThreshold(graphCtx,data.settings.hum_target,currentValueStyles.humColor(0.7),minHum,maxHum);
+      drawThreshold(graphCtx,data.settings.hum_max,currentValueStyles.humColor(0.7),minHum,maxHum);
       drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(0.6),minTemp,maxTemp);
     }
 
@@ -260,6 +268,10 @@ import ThermControls from './therm_controls.mjs';
 
     // ====== DRAW CURRENT VALUE LABELS ====== //
     drawCurrentValues(graphCtx,data.current,currentValueStyles);
+
+    if (data.settings.show_weather_values) {
+      drawWeatherValues(graphCtx,data.logged_weather,weatherStyles,currentValueStyles.fontSize);
+    }
   }
 
 
@@ -673,6 +685,7 @@ import ThermControls from './therm_controls.mjs';
   }
 
   function drawCurrentValues(ctx,currentValues,styles) {
+    console.log(styles.fontSize);
     ctx.textBaseline = "top";
     ctx.font = `${styles.fontSize}px ${styles.font}`;
 
@@ -697,6 +710,51 @@ import ThermControls from './therm_controls.mjs';
   }
 
 
+  function drawWeatherValues(ctx,weatherData,styles,currentValuesFontSize) {
+    console.log(`w${currentValuesFontSize}`);
+    // first, find the most recent values
+
+    const timestamp = Object.keys(weatherData).sort((a,b)=>parseInt(a)<parseInt(b)?1:parseInt(a)>parseInt(b)?-1:0)[0];
+    const temp = Math.round(parseFloat(weatherData[timestamp]["Temperature (degrees F)"]));
+    const hum = weatherData[timestamp]["Relative Humidity (%)"];
+
+    const time = new Date(parseInt(timestamp));
+    const delta = Date.now() - time;
+    let ago = timeAgoStr(delta);
+
+
+    ctx.textBaseline = "top";
+    ctx.font = `${styles.fontSize}px ${styles.font}`;
+
+    ctx.shadowColor = backgroundColor(1);
+    ctx.shadowBlur = styles.fontSize / 2;
+
+    for (let i=0; i<3; i++) { // just to make the shadows darker
+      let y = styles.fontSize * .15;
+      let x = currentValuesFontSize * 2.8;
+
+      ctx.textAlign = "left";
+      ctx.font = `${styles.fontSize}px ${styles.font}`;
+      ctx.fillStyle = styles.tempColor;
+      ctx.fillText(temp/* + "°"*/, x, y);
+
+      ctx.font = `${styles.fontSize/2}px ${font5}`;
+      ctx.fillStyle = styles.tempColor;
+      ctx.fillText(`(${ago})`, x * 1.5, y * 1.8);
+
+      x = graphWidth - x * 1.02;
+      ctx.textAlign = "right";
+      ctx.font = `${styles.fontSize}px ${styles.font}`;
+      ctx.fillStyle = styles.humColor;
+      ctx.fillText(hum/* + "%"*/, x, y);
+
+    }
+
+    ctx.shadowColor = 'transparent';
+  }
+
+
+
   function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -713,6 +771,17 @@ import ThermControls from './therm_controls.mjs';
       ctx.lineTo(i,canvas.height);
       ctx.stroke();
     }
+  }
+
+  function timeAgoStr(delta) {
+    let ago = delta / 1000;
+    if (ago < 60) return `${Math.round(ago)}s`;
+    ago /= 60;
+    if (ago < 60) return `${Math.round(ago)}m`;
+    ago /= 60;
+    if (ago < 48) return `${Math.round(ago*10)/10}h`;
+    ago /= 24;
+    return `${Math.round(ago*10)/10}d`;
   }
 
 })();
