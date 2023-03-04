@@ -106,7 +106,7 @@ import ThermControls from './therm_controls.mjs';
   // async function updateData(data) {
   window.updateData = async function (data) {
     console.log("Updating...");
-    console.log(data);
+    // console.log(data);
     if (data.error) {
       document.getElementById('root').innerHTML = `Error fetching thermostat data: ${data.error}`;
       return;
@@ -685,7 +685,7 @@ import ThermControls from './therm_controls.mjs';
   }
 
   function drawCurrentValues(ctx,currentValues,styles) {
-    console.log(styles.fontSize);
+    // console.log(styles.fontSize);
     ctx.textBaseline = "top";
     ctx.font = `${styles.fontSize}px ${styles.font}`;
 
