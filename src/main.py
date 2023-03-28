@@ -1,5 +1,5 @@
+from configure_logging import logger
 from flask import Flask, render_template, url_for, request, jsonify
-from pprint import pprint
 import datetime
 import json
 app = Flask(__name__)
@@ -41,6 +41,7 @@ def home():
 # sunlight gui route
 @app.route('/scenes/sunlight')
 def sunlight():
+    logger.debug("====== Entering SUNLIGHT Scene ======")
     warmest = 1900
     coldest = 6300
     time_res = 24 * 60 * 60 / width
@@ -54,7 +55,7 @@ def sunlight():
 def sunlight_update():
     # if request.method == "POST":
     #     data = request.get_json()
-    #     print(data)
+    #     logger.debug(data)
 
     try:
         with open("../../lighting-automation/src/data.json", "r") as f :
@@ -70,7 +71,7 @@ def sunlight_update():
 # thermostat gui route
 @app.route('/scenes/thermostat')
 def thermostat():
-
+    logger.debug("====== Entering THERMOSTAT Scene ======")
     return render_template('thermostat.html', name="Thermostat", width=width, height=height)
 
 # thermostat scene AJAX data request
@@ -82,7 +83,7 @@ def thermostat_update():
             therm_data = json.load(f)["scenes"]["thermostat"]
         results = therm_data
     except Exception as e:
-        print(e)
+        logger.error(repr(e))
         results = {"error" : e.message}
 
     return jsonify(results)
@@ -90,8 +91,10 @@ def thermostat_update():
 # relay control changes back to the automation controller
 @app.route('/thermostat_control', methods=['POST'])
 def thermostat_control():
-    print("receiving control change from UI, writing to file...")
+    logger.debug("receiving thermostat control change from UI, writing to file...")
     settingsUpdate = request.get_json()
+    logger.debug(f"updated settings requested by user:\n{json.dumps(settingsUpdate)}")
+
 
     # first, write settings update to the data.json file that we poll for updates
     try:
@@ -105,11 +108,11 @@ def thermostat_control():
 
             # write updated data to file
             json.dump(data, f)
-            print('wrote to data.json')
+            logger.debug('successfully updated settings in data.json')
 
     except Exception as e:
-        msg = f'Error retrieving/writing thermostat settings to data.json: {e}'
-        print(msg)
+        msg = f'Error retrieving/writing thermostat settings to data.json: {repr(e)}'
+        logger.error(msg)
         return msg
 
     # then, write to the actual thermostat settings file which permanently stores the data
@@ -125,11 +128,11 @@ def thermostat_control():
 
             # write updated data to file
             json.dump(settings, f)
-            print('wrote to settings.json')
+            logger.debug('successfully updated settings in settings.json')
 
     except Exception as e:
-        msg = f'Error retrieving/writing thermostat settings to settings.json: {e}'
-        print(msg)
+        msg = f'Error retrieving/writing thermostat settings to settings.json: {repr(e)}'
+        logger.error(msg)
         return msg
 
 
@@ -141,6 +144,7 @@ def thermostat_control():
 # clock gui route
 @app.route('/scenes/clock')
 def clock():
+    logger.debug("====== Entering CLOCK Scene ======")
     return render_template('clock.html', name="Clock", width=width, height=height)
 
 # clock scene AJAX data request

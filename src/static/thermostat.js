@@ -112,6 +112,8 @@ import ThermControls from './therm_controls.mjs';
       return;
     }
 
+    // console.log(JSON.stringify(data.current));
+
     // update thresholds on control screen
     thermCtrls.updateCtrls(data);
 
@@ -687,23 +689,36 @@ import ThermControls from './therm_controls.mjs';
   function drawCurrentValues(ctx,currentValues,styles) {
     // console.log(styles.fontSize);
     ctx.textBaseline = "top";
-    ctx.font = `${styles.fontSize}px ${styles.font}`;
-
-    ctx.shadowColor = backgroundColor(1);
-    ctx.shadowBlur = styles.fontSize / 2;
 
     for (let i=0; i<5; i++) { // just to make the shadows darker
+      ctx.font = `${styles.fontSize}px ${styles.font}`;
+      ctx.shadowColor = backgroundColor(1);
+      ctx.shadowBlur = styles.fontSize / 2;
+
       let y = styles.fontSize / 1.5;
       let x = styles.fontSize / 4;
 
+      // draw temp
+      // console.log(`x=${x}, y=${y}`);
       ctx.textAlign = "left";
       ctx.fillStyle = styles.tempColor(1);
       ctx.fillText(currentValues.temp_f + "°", x, y);
 
+      // draw humidity
       x = graphWidth;
+      // console.log(`x=${x}, y=${y}`);
       ctx.textAlign = "right";
       ctx.fillStyle = styles.humColor(1);
       ctx.fillText(currentValues.humidity + "%", x, y);
+
+      // draw other smaller temp (in other scale)
+      y += styles.fontSize * 1.3;
+      x = styles.fontSize / 4;
+      // console.log(`x=${x}, y=${y}`);
+      ctx.textAlign = "left";
+      ctx.fillStyle = styles.tempColor(.6);
+      ctx.font = `${styles.fontSize * .6}px ${styles.font}`;
+      ctx.fillText(currentValues.temp_c + "°", x, y);
     }
 
     ctx.shadowColor = 'transparent';
