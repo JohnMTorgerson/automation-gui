@@ -717,7 +717,7 @@ import ThermControls from './therm_controls.mjs';
       // console.log(`x=${x}, y=${y}`);
       ctx.textAlign = "left";
       ctx.fillStyle = styles.tempColor(.7);
-      ctx.font = `${styles.fontSize * .8}px ${styles.font}`;
+      ctx.font = `${styles.fontSize * .7}px ${styles.font}`;
       ctx.fillText(currentValues.temp_c + "°", x, y);
     }
 
