@@ -139,15 +139,15 @@ import ThermControls from './therm_controls.mjs';
     if (data.settings.on) {
       maxTemp = data.settings.temp_target + 3;//81;
       minTemp = data.settings.temp_target - data.settings.temp_hyst - 3;//74;
-      maxHum = data.settings.hum_max + 3;//41;
-      minHum = data.settings.hum_max - data.settings.hum_hyst - 3;//34;
+      maxHum = data.settings.rel_hum_max + 3;//41;
+      minHum = data.settings.rel_hum_max - data.settings.rel_hum_hyst - 3;//34;
     }
 
     // then expand the ranges as needed based on the values that appear in the data in our time range
     let tempRange = findValuesRangeInTimeRange(data.logged_sensor, "temp", startTime);
     minTemp = Math.min(minTemp, Math.floor(tempRange.min-1));
     maxTemp = Math.max(maxTemp, Math.ceil(tempRange.max+2));
-    let humRange = findValuesRangeInTimeRange(data.logged_sensor, "humidity", startTime);
+    let humRange = findValuesRangeInTimeRange(data.logged_sensor, "rel_hum", startTime);
     minHum = Math.min(minHum, Math.floor(humRange.min-1));
     maxHum = Math.max(maxHum, Math.ceil(humRange.max+2));
 
@@ -541,7 +541,7 @@ import ThermControls from './therm_controls.mjs';
         // console.log(`Time: ${time}`);
         const x = graphWidth * (timestamp-startTime) / timeRange;
         const temp = graphHeight * (1 - (parseFloat(sensorData[key].temp) - minTemp) / tempRange);
-        const hum = graphHeight * (1 - (parseFloat(sensorData[key].humidity) - minHum) / humRange);
+        const hum = graphHeight * (1 - (parseFloat(sensorData[key].rel_hum) - minHum) / humRange);
 
         if (!isNaN(temp) && !isNaN(hum)) {
           // console.log(`x:${x}, tempY:${temp}, humY:${hum}`);
@@ -709,7 +709,7 @@ import ThermControls from './therm_controls.mjs';
       // console.log(`x=${x}, y=${y}`);
       ctx.textAlign = "right";
       ctx.fillStyle = styles.humColor(1);
-      ctx.fillText(currentValues.humidity + "%", x, y);
+      ctx.fillText(currentValues.rel_hum + "%", x, y);
 
       // draw other smaller temp (in other scale)
       y += styles.fontSize * 1.3;
@@ -800,3 +800,4 @@ import ThermControls from './therm_controls.mjs';
   }
 
 })();
+
