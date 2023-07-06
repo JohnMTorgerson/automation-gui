@@ -66,6 +66,58 @@ def sunlight_update():
 
     return jsonify(results)
 
+# relay control changes back to the automation controller
+@app.route('/sunlight_control', methods=['POST'])
+def sunlight_control():
+    logger.debug("receiving sunlight control change from UI, writing to file...")
+    settingsUpdate = request.get_json()
+    logger.debug(f"updated settings requested by user:\n{json.dumps(settingsUpdate)}")
+
+
+    # first, write settings update to the data.json file that we poll for updates
+    try:
+        with open("../../lighting-automation/src/data.json", "r+") as f :
+            data = json.load(f)
+            data["scenes"]["sunlight"]["settings"] = settingsUpdate
+
+            # delete file contents
+            f.seek(0)
+            f.truncate()
+
+            # write updated data to file
+            json.dump(data, f)
+            logger.debug('successfully updated settings in data.json')
+
+    except Exception as e:
+        msg = f'Error retrieving/writing sunlight settings to data.json: {repr(e)}'
+        logger.error(msg)
+        return msg
+
+    # then, write to the actual settings file which permanently stores the data
+    # (and is polled by the automation script every time it is run by the cron job)
+    try:
+        with open("../../lighting-automation/src/scenes/timebased/sunlight/settings.json", "r+") as f :
+            settings = json.load(f)
+            settings |= settingsUpdate
+
+            # delete file contents
+            f.seek(0)
+            f.truncate()
+
+            # write updated data to file
+            json.dump(settings, f)
+            logger.debug('successfully updated settings in settings.json')
+
+    except Exception as e:
+        msg = f'Error retrieving/writing sunlight settings to settings.json: {repr(e)}'
+        logger.error(msg)
+        return msg
+
+
+
+    return jsonify(settings)
+
+
 # ====== THERMOSTAT SCENE ====== #
 
 # thermostat gui route

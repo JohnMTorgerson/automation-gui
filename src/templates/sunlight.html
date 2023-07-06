@@ -3,8 +3,8 @@
 {% block head %}
   {{ super() }}
 
-  <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='sunlight_style.css')}}">
-  <script src="{{url_for('static', filename='sunlight.js')}}"></script>
+  <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='sunlight_style.css')}}">
+  <script type="module" src="{{url_for('static', filename='sunlight.js')}}"></script>
 
   <script type="text/javascript">
     width = {{width}};
@@ -21,7 +21,26 @@
 
 {% block content %}
   <div id="canvas_container" style="width:{{width}}px; height:{{height}}px;">
-    <canvas id="sunlight_canvas" width="{{width}}" height="{{height}}"></canvas>
+    <canvas id="sunlight_canvas" class="main_canvas" width="{{width}}" height="{{height}}"></canvas>
     <div id="clock"></div>
   </div>
+  <div id="controls_container">
+    <div id="onoff_switch">
+      <div class="switch_outer button">
+        <div class="switch_inner"></div>
+      </div>
+    </div>
+    <!-- <div id="brightness_controls" class="controls">
+      <div class="label">bright</div>
+      <div class="current">
+        <div class="current_setting"></div>
+        <div class="units">pct</div>
+      </div>
+      <div class="button_container">
+        <div class="button up"></div>
+        <div class="button down"></div>
+      </div>
+    </div> -->
+  </div>
+
 {% endblock %}

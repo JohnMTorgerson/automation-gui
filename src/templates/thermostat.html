@@ -3,7 +3,6 @@
 {% block head %}
   {{ super() }}
   <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='thermostat_style.css')}}">
-  <script type="module" src="{{url_for('static', filename='therm_controls.mjs')}}" defer></script>
   <script type="module" src="{{url_for('static', filename='thermostat.js')}}" defer></script>
 
   <script type="text/javascript">
@@ -18,7 +17,7 @@
 {% block content %}
     <div id="canvas_container" style="width:{{width}}px; height:{{height}}px;">
       <canvas id="temp_labels"></canvas>
-      <canvas id="graph"></canvas>
+      <canvas id="graph" class="main_canvas"></canvas>
       <canvas id="hum_labels"></canvas>
       <canvas id="time_labels"></canvas>
     </div>

@@ -46,7 +46,7 @@ export default class Controls {
     }
   
     setElementSizes() {
-      this.rect = document.getElementById("graph").getBoundingClientRect();
+      this.rect = document.getElementsByClassName("main_canvas")[0].getBoundingClientRect();
       this.container = document.querySelector("#canvas_container");
   
       const controls = document.getElementById("controls_container");

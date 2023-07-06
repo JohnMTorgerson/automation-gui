@@ -1,12 +1,16 @@
+import SunlightControls from './SunlightControls.mjs';
+
+const sunCtrls = new SunlightControls();
+
 // get time from remote source
-worldTime = null; // will be used to contain current time from online source
+var worldTime = null; // will be used to contain current time from online source
 var timeInterval;
 getWorldTime();
 setInterval(getWorldTime,300000); // recheck time once every five minutes
 
-// fetch data immediately on page load, and then at ten second intervals thereafter
-fetchData();
-setInterval(fetchData,10000);
+// fetch data and save any data changes immediately on page load, and then at ten second intervals thereafter
+fetchAndSaveData();
+setInterval(fetchAndSaveData,10000);
 
 
 
@@ -14,7 +18,35 @@ setInterval(fetchData,10000);
 
 
 // dynamically load scene data from flask server
-function fetchData() {
+async function fetchAndSaveData() {
+    // first, if a change was made (e.g. the user changed the temp threshold through the UI)
+  // since the server was last polled, we need to update the server with the changes
+  // before getting updated data from it
+  if (sunCtrls.changed) {
+    console.log("control change occurred, sending to server to save to file...")
+
+    // send update to server to save to file
+    const fetchRequest = {
+      cache: "no-cache",
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(sunCtrls.data["settings"])
+    }
+
+    let response = await fetch('/sunlight_control',fetchRequest);
+    if (response.ok) {
+      console.log("...sent to server");
+    } else {
+      console.log(response.status)
+    }
+
+    // change the flag back to false
+    sunCtrls.changed = false;
+  }
+
+
   console.log('fetching data');
 
   fetch('/sunlight_update')
@@ -32,7 +64,11 @@ function fetchData() {
   });
 }
 
-function updateData(data) {
+window.updateData = async function (data) {
+  // update data on control screen
+  sunCtrls.updateCtrls(data);
+
+
   // options
   let fontSize = height / 20; // set main fontSize for text labels
   let font = "Helvetica";
@@ -184,8 +220,8 @@ function updateData(data) {
 
   // draw temp labels (y axis)
   relFontSize = fontSize * 1.7;
-  mainStyle = "rgba(250,230,200,1)";
-  fadeStyle = "rgba(250,230,200,.4)";
+  let mainStyle = "rgba(250,230,200,1)";
+  let fadeStyle = "rgba(250,230,200,.4)";
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
   ctx.fillStyle = mainStyle;
