@@ -1,4 +1,4 @@
-import ThermControls from './therm_controls.mjs';
+import ThermControls from './ThermControls.mjs';
 
 (function main() {
 
