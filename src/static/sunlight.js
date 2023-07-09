@@ -158,7 +158,7 @@ import SunlightControls from './SunlightControls.mjs';
 
 
     // draw sunrise/sunset markers
-    let relFontSize = fontSize * 2.0;
+    let relFontSize = fontSize * 2.2;
     let srTimeStr = new Date(data["suntimes"][0]*1000 + midnight);
     srTimeStr = `${srTimeStr.getHours()}:${srTimeStr.getMinutes().toString().replace(/.*/,(m) => m < 10 ? '0' + m : m)}`;
     let ssTimeStr = new Date(data["suntimes"][1]*1000 + midnight);
@@ -262,8 +262,8 @@ import SunlightControls from './SunlightControls.mjs';
     x = (now - midnight) / (24*60*60*1000) * width;
     y = height - ( (data["current_temp"] - warmest) / (coldest - warmest) * height );
 
-    ctx.strokeStyle = "rgba(100,0,150,.17)"; // crosshairs
-    ctx.lineWidth = 5;
+    ctx.strokeStyle = "rgba(100,0,150,.3)"; // crosshairs
+    ctx.lineWidth = 8;
     ctx.moveTo(x, 0);
     ctx.lineTo(x, height);
     ctx.moveTo(0, y);
@@ -272,16 +272,16 @@ import SunlightControls from './SunlightControls.mjs';
 
 
     ctx.beginPath();
-    ctx.arc(x, y, fontSize/2.5, 0, 2 * Math.PI, false); // background glow
+    ctx.arc(x, y, fontSize/2, 0, 2 * Math.PI, false); // background glow
     ctx.lineWidth = fontSize/1.5;
-    ctx.strokeStyle = "rgba(100,100,255,.3)";
+    ctx.strokeStyle = "rgba(100,100,255,.4)";
     ctx.stroke();
 
     ctx.beginPath();
     ctx.fillStyle = "white";
-    ctx.arc(x, y, fontSize/3, 0, 2 * Math.PI, false); // main circle
+    ctx.arc(x, y, fontSize/2.5, 0, 2 * Math.PI, false); // main circle
     ctx.lineWidth = fontSize/2.5;
-    ctx.strokeStyle = "rgba(200,200,255,.5)";
+    ctx.strokeStyle = "rgba(200,200,255,.7)";
     ctx.stroke();
     ctx.fill();
 

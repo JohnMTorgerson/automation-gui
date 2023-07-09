@@ -18,9 +18,7 @@ body {
   transform: translate(-50%, -50%);
 
   font-family: 'OdysseyHalf';
-  /* font-size: 170px; */
-  font-size: 140px;
-
+  font-size: 170px;
 
   /* background: linear-gradient(180deg, rgba(255,255,255,1) 55%, rgba(255,50,255,1) 80%);
   background-clip: text;
