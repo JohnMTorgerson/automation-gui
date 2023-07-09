@@ -156,6 +156,17 @@ import SunlightControls from './SunlightControls.mjs';
     ctx.fillStyle = sunset_grd; // sunrise shading
     ctx.fillRect(width - sunsetWidth, 0, sunsetWidth, height); // sunrise shading
 
+    // draw crosshairs behind jewel
+    x = (now - midnight) / (24*60*60*1000) * width;
+    y = height - ( (data["current_temp"] - warmest) / (coldest - warmest) * height );
+    ctx.strokeStyle = "rgba(100,0,150,.3)"; // crosshairs
+    ctx.lineWidth = 8;
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+
 
     // draw sunrise/sunset markers
     let relFontSize = fontSize * 2.2;
@@ -262,15 +273,6 @@ import SunlightControls from './SunlightControls.mjs';
     x = (now - midnight) / (24*60*60*1000) * width;
     y = height - ( (data["current_temp"] - warmest) / (coldest - warmest) * height );
 
-    ctx.strokeStyle = "rgba(100,0,150,.3)"; // crosshairs
-    ctx.lineWidth = 8;
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, height);
-    ctx.moveTo(0, y);
-    ctx.lineTo(width, y);
-    ctx.stroke();
-
-
     ctx.beginPath();
     ctx.arc(x, y, fontSize/2, 0, 2 * Math.PI, false); // background glow
     ctx.lineWidth = fontSize/1.5;
@@ -302,7 +304,7 @@ import SunlightControls from './SunlightControls.mjs';
 
     // display current color temp in middle of screen in large font
     let currentEl = document.getElementById("current_val");
-    currentEl.innerHTML = `${Math.round(data["current_temp"])}K`;
+    currentEl.innerHTML = `${Math.round(data["current_temp"])}<span id="K">K</span>`;
 
     // relFontSize = height / 3;
     // x = width/2;

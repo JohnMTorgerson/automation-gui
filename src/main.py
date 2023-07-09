@@ -58,6 +58,7 @@ def sunlight_update():
     #     logger.debug(data)
 
     try:
+        # with open("../../lighting-automation/src/data_2023-07-08-2122.json", "r") as f :
         with open("../../lighting-automation/src/data.json", "r") as f :
             sunlight_data = json.load(f)["scenes"]["sunlight"]
         results = sunlight_data
