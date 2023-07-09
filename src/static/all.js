@@ -35,6 +35,7 @@
 
     mouseCounter++;
   });
+  
   // reset mouseCounter when a click happens, so that incidental movement from multiple touchscreen presses doesn't make the cursor appear
   document.querySelectorAll(".button").forEach(el => {
     el.addEventListener("click",(e) => {

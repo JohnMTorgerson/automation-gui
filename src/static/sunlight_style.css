@@ -54,10 +54,11 @@ body {
   left: 0px;
   top: 0px;
   /* top: -7px; /* on development machine using Firefox, the ::after block is shifted down 7px, but not on the Raspberry Pi using Firefox */
-  opacity: .8;
+  opacity: .9;
   text-shadow: none;
   background: linear-gradient(to bottom, rgba(248,137,36,1) 50%, rgba(92,178,255,1) 75%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

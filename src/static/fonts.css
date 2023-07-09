@@ -19,35 +19,35 @@
   src: url('fonts/Twobit.ttf');
 }
 
-@font-face {
+/* @font-face {
   font-family: 'Open24';
   src: url('fonts/Open24.ttf');
-}
+} */
 
-@font-face {
+/* @font-face {
   font-family: 'DeadCRT';
   src: url('fonts/DEADCRT.ttf');
-}
+} */
 
-@font-face {
+/* @font-face {
   font-family: 'MaximumSecurity';
   src: url('fonts/MaximumSecurity.ttf');
-}
+} */
 
 @font-face {
   font-family: 'AdvancedDot';
   src: url('fonts/advanced_dot_digital-7.ttf');
 }
 
-@font-face {
+/* @font-face {
   font-family: 'Abduction';
   src: url('fonts/abduction2002.ttf');
-}
+} */
 
-@font-face {
+/* @font-face {
   font-family: 'Unlearned';
   src: url('fonts/unlearn2.ttf');
-}
+} */
 
 @font-face {
   font-family: 'WarGames';

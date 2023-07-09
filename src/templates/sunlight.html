@@ -4,7 +4,7 @@
   {{ super() }}
 
   <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='sunlight_style.css')}}">
-  <script type="module" src="{{url_for('static', filename='sunlight.js')}}"></script>
+  <script type="module" src="{{url_for('static', filename='sunlight.js')}}" defer></script>
 
   <script type="text/javascript">
     width = {{width}};

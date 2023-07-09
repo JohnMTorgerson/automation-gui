@@ -7,6 +7,7 @@ import ThermControls from './ThermControls.mjs';
 
   // fetch data and save any data changes immediately on page load, and then at ten second intervals thereafter
   fetchAndSaveData();
+  setTimeout(fetchAndSaveData,500); // annoying, but fonts used in the canvas may not be loaded on first draw; do this so we don't have to wait the full 10 seconds for the next update
   setInterval(fetchAndSaveData,10000);
 
 
@@ -22,10 +23,10 @@ import ThermControls from './ThermControls.mjs';
   // let bigNumberFont = "OdysseyHalf";
   // let biggerNumberFont = "OdysseyGrad";
   const font = "AdvancedDot";
-  const font1 = "MaximumSecurity";
+  // const font1 = "MaximumSecurity";
   const font2 = "Twobit";
   const font3 = "Odyssey";
-  const font4 = "DeadCRT";
+  // const font4 = "DeadCRT";
   const font5 = "WarGames";
 
   // // draw overlay, a semi-transparent graphic that lies atop the rest of the screen
