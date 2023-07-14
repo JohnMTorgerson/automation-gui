@@ -133,6 +133,7 @@
     --color: rgba(50,255,50,1);
     --color_faded: rgba(50,255,50,.5);
     --bg_color_on: rgba(255,50,200,.5);
+    --bg_color_off: transparent;
   
     display: block;
     position:absolute;
@@ -188,12 +189,13 @@
     from {
         padding-left: var(--padding);
         width: var(--width);
+        background: var(--bg_color_off);
     }
   
     to {
         padding-left: var(--paddingLeft);
         width: calc(var(--width) - var(--paddingLeft) + var(--padding));
-        background-color: var(--bg_color_on);
+        background: var(--bg_color_on);
     }
 }
   
@@ -201,12 +203,13 @@
     to {
         padding-left: var(--padding);
         width: var(--width);
+        background: var(--bg_color_off);
     }
   
     from {
         padding-left: var(--paddingLeft);
         width: calc(var(--width) - var(--paddingLeft) + var(--padding));
-        background-color: var(--bg_color_on);
+        background: var(--bg_color_on);
     }
 }
   

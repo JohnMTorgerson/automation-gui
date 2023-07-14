@@ -13,17 +13,19 @@ Object.keys(scenes).sort().forEach((name) => {
   widgets.push(widget);
 });
 
-// create some dummy widgets for testing purposes
-for (let i=0; i<0; i++) {
-  widgets.push(new SceneWidget(`scene${i}`));
-}
+// // create some dummy widgets for testing purposes
+// for (let i=0; i<0; i++) {
+//   widgets.push(new SceneWidget(`scene${i}`));
+// }
 
 // update the widgets now and at regular intervals hereafter
 updateWidgets();
 setInterval(updateWidgets,10000);
 
 function updateWidgets() {
+  // console.log("============== updating widgets...")
   widgets.forEach(widget => {
+    // console.log(`updating ${widget.name} widget...`);
     let transform;
 
     // add any scene-specific display transformations for the data
@@ -34,6 +36,12 @@ function updateWidgets() {
         };
         break;
 
+      case "color" :
+          transform = (data) => {
+            return `<div style="background-color:#${data}"></div>`;
+          };
+          break;
+  
       case "thermostat" :
         transform = (data) => {
           return Math.round(parseFloat(data)*10)/10 + '°';

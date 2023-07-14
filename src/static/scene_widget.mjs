@@ -33,7 +33,7 @@ export default class SceneWidget {
   // take an optional transform function to alter the display of the data
   update(transform) {
     // then load data and settings from server
-    console.log(`updating widget info for ${this.name} scene`);
+    // console.log(`updating widget info for ${this.name} scene`);
     fetch(this.updateRoute)
     .then(async response => {
       if (response.ok) {
@@ -43,7 +43,7 @@ export default class SceneWidget {
         let temp = data;
         this.property.forEach((prop) => {temp = temp[prop]});
         this.info = temp;
-        console.log(`updated info for ${this.name} widget is ${temp}`);
+        // console.log(`updated info for ${this.name} widget is ${temp}`);
 
         if (typeof transform === "function") {
           this.info = transform(this.info);

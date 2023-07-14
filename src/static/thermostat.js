@@ -5,11 +5,6 @@ import ThermControls from './ThermControls.mjs';
   setElementSizes();
   const thermCtrls = new ThermControls();
 
-  // fetch data and save any data changes immediately on page load, and then at ten second intervals thereafter
-  fetchAndSaveData();
-  setTimeout(fetchAndSaveData,500); // annoying, but fonts used in the canvas may not be loaded on first draw; do this so we don't have to wait the full 10 seconds for the next update
-  setInterval(fetchAndSaveData,10000);
-
 
   const backgroundColor = (a) => `rgba(0,0,0,${isNaN(a) ? '1' : a})`;
   const mainColor = (a) => `rgba(50,255,50,${isNaN(a) ? '1' : a})`; // green
@@ -36,8 +31,7 @@ import ThermControls from './ThermControls.mjs';
 
 
   // dynamically load scene data from flask server
-  async function fetchAndSaveData() {
-
+  window.fetchAndSaveData = async function () {
     // first, if a change was made (e.g. the user changed the temp threshold through the UI)
     // since the server was last polled, we need to update the server with the changes
     // before getting updated data from it
@@ -67,7 +61,7 @@ import ThermControls from './ThermControls.mjs';
 
 
     // then load data and settings from server
-    console.log('fetching data');
+    // console.log('fetching data');
     fetch('/thermostat_update')
     .then(async response => {
       if (response.ok) {
@@ -106,7 +100,7 @@ import ThermControls from './ThermControls.mjs';
 
   // async function updateData(data) {
   window.updateData = async function (data) {
-    console.log("Updating...");
+    // console.log("Updating...");
     // console.log(data);
     if (data.error) {
       document.getElementById('root').innerHTML = `Error fetching thermostat data: ${data.error}`;
@@ -319,7 +313,7 @@ import ThermControls from './ThermControls.mjs';
     //   range.max = 80;
     // }
 
-    console.log(range);
+    // console.log(range);
 
     return range;
   }
@@ -799,6 +793,14 @@ import ThermControls from './ThermControls.mjs';
     ago /= 24;
     return `${Math.round(ago*10)/10}d`;
   }
+
+  // =========================================== //
+
+  // fetch data and save any data changes immediately on page load, and then at ten second intervals thereafter
+  fetchAndSaveData();
+  setTimeout(fetchAndSaveData,500); // annoying, but fonts used in the canvas may not be loaded on first draw; do this so we don't have to wait the full 10 seconds for the next update
+  setInterval(fetchAndSaveData,10000);
+  
 
 })();
 

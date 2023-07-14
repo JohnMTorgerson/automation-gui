@@ -1,0 +1,40 @@
+{% extends "scene.html" %}
+
+{% block head %}
+  {{ super() }}
+
+  <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='color_style.css')}}">
+  <script type="module" src="{{url_for('static', filename='color.js')}}" defer></script>
+
+{% endblock %}
+
+
+{% block content %}
+  <div id="main_container" style="width:{{width}}px; height:{{height}}px;">
+    <!-- <canvas id="sunlight_canvas" class="main_canvas" width="{{width}}" height="{{height}}"></canvas> -->
+  </div>
+
+  <div id="controls_container">
+    <div id="onoff_switch">
+      <div class="switch_outer button">
+        <div class="switch_inner"></div>
+      </div>
+    </div>
+    <div id="color_form" class="controls">
+        <input type="text"/>
+        <button>Enter</button>
+    </div>
+    <!-- <div id="brightness_controls" class="controls">
+      <div class="label">bright</div>
+      <div class="current">
+        <div class="current_setting"></div>
+        <div class="units">pct</div>
+      </div>
+      <div class="button_container">
+        <div class="button up"></div>
+        <div class="button down"></div>
+      </div>
+    </div> -->
+  </div>
+
+{% endblock %}

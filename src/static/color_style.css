@@ -1,0 +1,35 @@
+body {
+    margin: 0px;
+    cursor: none;
+    user-select: none;
+  }
+  
+  #main_container {
+    position:relative;
+    --lightness: 50%;
+  
+
+    /* background-repeat:repeat-x; */
+    /* background-size: 50% 500%; */
+  }
+    
+  #onoff_switch {
+    --color: rgba(200,200,200,1);
+    --color_faded: hsla(0, 0%, 50%, 0.5);
+    --bg_color_on: linear-gradient(-90deg,
+        /* hsl(0, 100%, 63%), */
+        /* hsl(30, 100%, 47%), */
+        hsl(60, 100%, 37%),
+        hsl(90, 100%, 34%),
+        hsl(120, 100%, 35%),
+        hsl(150, 100%, 35%),
+        hsl(180, 100%, 33%),
+        hsl(210, 100%, 60%),
+        hsl(240, 100%, 72%),
+        hsl(270, 100%, 63%),
+        hsl(300, 100%, 43%),
+        hsl(330, 100%, 55%),
+        hsl(360, 100%, 50%)
+    );
+    --bg_color_off: linear-gradient(to right, hsl(29, 65%, 75%) 30%, /*hsl(0, 0%, 85%) 62.5%,*/ hsl(222, 65%, 70%) 75%);
+  }

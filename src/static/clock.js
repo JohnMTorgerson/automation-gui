@@ -13,7 +13,7 @@ function updateClock() {
   // we're getting the time from the server instead of doing it clientside
   // really only because the "home" screen needs to get the scene's data (in this case the time)
   // from the server
-  console.log('fetching data');
+  // console.log('fetching data');
   fetch('/clock_update')
   .then(async response => {
     if (response.ok) {

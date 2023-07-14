@@ -1,12 +1,19 @@
 from configure_logging import logger
-from flask import Flask, render_template, url_for, request, jsonify
+from flask import Flask, render_template, url_for, request, jsonify, make_response
 import datetime
 import json
+import sys
+import os
+sys.path.insert(1, os.path.abspath('../../lighting-automation/home_automation'))
+import home_automation
+
+dir()
+
 app = Flask(__name__)
 
 width=800
 height=480
-
+home_auto_path = "../../lighting-automation/home_automation"
 
 # ====== MAIN SCREEN ====== #
 @app.route('/')
@@ -18,6 +25,12 @@ def home():
             "update" : '/sunlight_update',
             "property" : 'current_temp',
             "bg" : "/static/images/sunlight-icon.png"
+        },
+        "color" : {
+            "route" : '/scenes/color',
+            "update" : '/color_update',
+            "property" : ['settings','color'],
+            "bg" : ""
         },
         "thermostat" : {
             "route" : '/scenes/thermostat',
@@ -58,28 +71,44 @@ def sunlight_update():
     #     logger.debug(data)
 
     try:
-        # with open("../../lighting-automation/src/data_2023-07-08-2122.json", "r") as f :
-        with open("../../lighting-automation/src/data.json", "r") as f :
+        # with open(f"{home_auto_path}/data_2023-07-08-2122.json", "r") as f :
+        with open(f"{home_auto_path}/data.json", "r") as f :
             sunlight_data = json.load(f)["scenes"]["sunlight"]
         results = sunlight_data
     except Exception as e:
-        results = {"error" : e}
+        logger.error(repr(e))
+        results = {"error" : repr(e)}
 
     return jsonify(results)
 
 # relay control changes back to the automation controller
 @app.route('/sunlight_control', methods=['POST'])
-def sunlight_control():
+def sunlight_control(obj=None):
     logger.debug("receiving sunlight control change from UI, writing to file...")
-    settingsUpdate = request.get_json()
-    logger.debug(f"updated settings requested by user:\n{json.dumps(settingsUpdate)}")
 
+    if obj is not None:
+        settingsUpdate = obj
+        reciprocate = False
+    else:
+        settingsUpdate = request.get_json()
+        reciprocate = True
+
+    logger.debug(f"updated sunlight settings requested by user are:\n{json.dumps(settingsUpdate)}")
 
     # first, write settings update to the data.json file that we poll for updates
     try:
-        with open("../../lighting-automation/src/data.json", "r+") as f :
+        with open(f"{home_auto_path}/data.json", "r+") as f :
             data = json.load(f)
-            data["scenes"]["sunlight"]["settings"] = settingsUpdate
+
+            # check if "on" setting has changed
+            old_on = data["scenes"]["sunlight"]["settings"]["on"]
+            try:
+                new_on = settingsUpdate["on"]
+            except KeyError as e:
+                new_on = old_on
+
+            # merge update
+            data["scenes"]["sunlight"]["settings"] |= settingsUpdate
 
             # delete file contents
             f.seek(0)
@@ -87,7 +116,7 @@ def sunlight_control():
 
             # write updated data to file
             json.dump(data, f)
-            logger.debug('successfully updated settings in data.json')
+            logger.debug('successfully updated sunlight settings in data.json')
 
     except Exception as e:
         msg = f'Error retrieving/writing sunlight settings to data.json: {repr(e)}'
@@ -97,7 +126,7 @@ def sunlight_control():
     # then, write to the actual settings file which permanently stores the data
     # (and is polled by the automation script every time it is run by the cron job)
     try:
-        with open("../../lighting-automation/src/scenes/timebased/sunlight/settings.json", "r+") as f :
+        with open(f"{home_auto_path}/scenes/timebased/sunlight/settings.json", "r+") as f :
             settings = json.load(f)
             settings |= settingsUpdate
 
@@ -107,16 +136,135 @@ def sunlight_control():
 
             # write updated data to file
             json.dump(settings, f)
-            logger.debug('successfully updated settings in settings.json')
+            logger.debug('successfully updated sunlight settings in settings.json')
 
     except Exception as e:
         msg = f'Error retrieving/writing sunlight settings to settings.json: {repr(e)}'
         logger.error(msg)
         return msg
 
+    # if the sunlight scene is set to 'on', turn off the color scene
+    # i.e. the color scene needs to be off if sunlight is on, but not vice versa
+    #   (the 'reciprocate' flag is false if we were passed data through the 'obj' param, because that only happens
+    #   if the color scene was turned off/on and is itself reciprocating to us,
+    #   in which case we don't need to tell it to do anything)
+    if reciprocate and new_on is True:
+        color_control(obj={"on": False})
+
+    # run the actual scene!!!
+    if new_on is True:
+        home_automation.sunlight_scene()
+
 
 
     return jsonify(settings)
+
+
+
+# ====== COLOR SCENE ====== #
+
+# sunlight gui route
+@app.route('/scenes/color')
+def color():
+    logger.debug("====== Entering COLOR Scene ======")
+
+    return render_template('color.html', name="Color", width=width, height=height)
+
+# sunlight scene AJAX data request
+@app.route('/color_update', methods=['POST', 'GET'])
+def color_update():
+    # if request.method == "POST":
+    #     data = request.get_json()
+    #     logger.debug(data)
+
+    try:
+        # with open(f"{home_auto_path}/data_2023-07-08-2122.json", "r") as f :
+        with open(f"{home_auto_path}/data.json", "r") as f :
+            color_data = json.load(f)["scenes"]["color"]
+        results = color_data
+    except Exception as e:
+        logger.error(repr(e))
+        results = {"error" : repr(e)}
+
+    return jsonify(results)
+
+# relay control changes back to the automation controller
+@app.route('/color_control', methods=['POST'])
+def color_control(obj=None):
+    logger.debug("receiving color control change from UI, writing to file...")
+
+    if obj is not None:
+        reciprocate = False
+        settingsUpdate = obj
+    else:
+        reciprocate = True
+        settingsUpdate = request.get_json()
+
+    logger.debug(f"updated color settings requested by user:\n{json.dumps(settingsUpdate)}")
+
+    # first, write settings update to the data.json file that we poll for updates
+    try:
+        with open(f"{home_auto_path}/data.json", "r+") as f :
+            data = json.load(f)
+
+            # check if "on" setting has changed
+            old_on = data["scenes"]["color"]["settings"]["on"]
+            try:
+                new_on = settingsUpdate["on"]
+            except KeyError as e:
+                new_on = old_on
+
+            # merge update
+            data["scenes"]["color"]["settings"] |= settingsUpdate
+
+            # delete file contents
+            f.seek(0)
+            f.truncate()
+
+            # write updated data to file
+            json.dump(data, f)
+            logger.debug('successfully updated color settings in data.json')
+
+    except Exception as e:
+        msg = f'Error retrieving/writing color settings to data.json: {repr(e)}'
+        logger.error(msg)
+        return msg
+
+    # then, write to the actual settings file which permanently stores the data
+    # (and is polled by the automation script every time it is run by the cron job)
+    try:
+        with open(f"{home_auto_path}/scenes/basic/color/settings.json", "r+") as f :
+            settings = json.load(f)
+            settings |= settingsUpdate
+
+            # delete file contents
+            f.seek(0)
+            f.truncate()
+
+            # write updated data to file
+            json.dump(settings, f)
+            logger.debug('successfully updated color settings in settings.json')
+
+    except Exception as e:
+        msg = f'Error retrieving/writing color settings to settings.json: {repr(e)}'
+        logger.error(msg)
+        return msg
+
+    # if the on/off state of the color scene has changed, change the sunlight scene to the opposite state
+    # i.e. the sunlight scene needs to be off if color is on, and vice versa;
+    #   (the 'reciprocate' flag is false if we were passed data through the 'obj' param, because that only happens
+    #   if the sunlight scene was turned off/on and is itself reciprocating to us,
+    #   in which case we don't need to tell it to do anything)
+    if reciprocate and new_on != old_on:
+        sunlight_control(obj={"on": not new_on})
+
+        # run the actual scene!!!
+        if new_on is True:
+            home_automation.color_scene()
+
+
+    return jsonify(settings)
+
 
 
 # ====== THERMOSTAT SCENE ====== #
@@ -132,12 +280,12 @@ def thermostat():
 def thermostat_update():
 
     try:
-        with open("../../lighting-automation/src/data.json", "r") as f :
+        with open(f"{home_auto_path}/data.json", "r") as f :
             therm_data = json.load(f)["scenes"]["thermostat"]
         results = therm_data
     except Exception as e:
         logger.error(repr(e))
-        results = {"error" : e.message}
+        results = {"error" : repr(e)}
 
     return jsonify(results)
 
@@ -151,9 +299,9 @@ def thermostat_control():
 
     # first, write settings update to the data.json file that we poll for updates
     try:
-        with open("../../lighting-automation/src/data.json", "r+") as f :
+        with open(f"{home_auto_path}/data.json", "r+") as f :
             data = json.load(f)
-            data["scenes"]["thermostat"]["settings"] = settingsUpdate
+            data["scenes"]["thermostat"]["settings"] |= settingsUpdate
 
             # delete file contents
             f.seek(0)
@@ -161,7 +309,7 @@ def thermostat_control():
 
             # write updated data to file
             json.dump(data, f)
-            logger.debug('successfully updated settings in data.json')
+            logger.debug('successfully updated thermostat settings in data.json')
 
     except Exception as e:
         msg = f'Error retrieving/writing thermostat settings to data.json: {repr(e)}'
@@ -171,7 +319,7 @@ def thermostat_control():
     # then, write to the actual thermostat settings file which permanently stores the data
     # (and is polled by the automation script every time it is run by the cron job)
     try:
-        with open("../../lighting-automation/src/scenes/basic/thermostat/settings.json", "r+") as f :
+        with open(f"{home_auto_path}/scenes/basic/thermostat/settings.json", "r+") as f :
             settings = json.load(f)
             settings |= settingsUpdate
 
@@ -181,7 +329,7 @@ def thermostat_control():
 
             # write updated data to file
             json.dump(settings, f)
-            logger.debug('successfully updated settings in settings.json')
+            logger.debug('successfully updated thermostat settings in settings.json')
 
     except Exception as e:
         msg = f'Error retrieving/writing thermostat settings to settings.json: {repr(e)}'
