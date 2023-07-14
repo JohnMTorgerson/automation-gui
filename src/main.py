@@ -4,7 +4,7 @@ import datetime
 import json
 import sys
 import os
-sys.path.insert(1, os.path.abspath('../../lighting-automation/home_automation'))
+sys.path.insert(1, os.path.abspath('../../home-automation/home_automation'))
 import home_automation
 
 dir()
@@ -13,7 +13,7 @@ app = Flask(__name__)
 
 width=800
 height=480
-home_auto_path = "../../lighting-automation/home_automation"
+home_auto_path = "../../home-automation/home_automation"
 
 # ====== MAIN SCREEN ====== #
 @app.route('/')

@@ -1,7 +1,7 @@
 import Controls from "./Controls.mjs";
 
 export default class ThermControls extends Controls {
-  // get json data from lighting-automation;
+  // get json data from home-automation;
   // called every update interval by fetchData() in thermostat.js
   updateCtrls(data) {
     super.updateCtrls(data);

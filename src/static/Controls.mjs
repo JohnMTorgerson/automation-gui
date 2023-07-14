@@ -1,6 +1,6 @@
 export default class Controls {
     constructor(data) {
-      this.data = data; // JSON data read from lighting-automation, with sensor history, weather data, settings, etc.
+      this.data = data; // JSON data read from home-automation, with sensor history, weather data, settings, etc.
       this.ctrlChange = {}; // data should be an object, with key/value pairs corresponding with those in settings.json in the automation controller
 
       try { // get main canvas bounding rect and container element
@@ -15,7 +15,7 @@ export default class Controls {
       this.setEvents(); // set mouse events on DOM objects
     }
   
-    // get json data from lighting-automation;
+    // get json data from home-automation;
     // called every update interval by fetchAndSaveData() in scene script
     updateCtrls(data) {
       if (data) this.data = data;
@@ -32,6 +32,9 @@ export default class Controls {
   
   
     saveCtrlChange(delay) {
+      // a flag to show that a change was made
+      this.changed = true;
+      
       // combine settings change with existing settings
       this.data["settings"] = {...this.data["settings"],...this.ctrlChange}
   
@@ -48,9 +51,6 @@ export default class Controls {
       this.saveDelay = setTimeout(() => {
         window.parent.fetchAndSaveData(this.data);
       },delay);
-  
-      // a flag to show that a change was made
-      this.changed = true;
     }
   
     setElementSizes() {  

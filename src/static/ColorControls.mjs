@@ -14,7 +14,7 @@ export default class ColorControls extends Controls {
         this.firstUpdate = true;
     }
 
-  // get json data from lighting-automation;
+  // get json data from home-automation;
   // called every update interval by fetchData() in sunlight.js
   updateCtrls(data) {
     super.updateCtrls(data);
