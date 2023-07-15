@@ -37,8 +37,12 @@ function updateWidgets() {
         break;
 
       case "color" :
-          transform = (data) => {
-            return `<div style="background-color:#${data}"></div>`;
+          transform = (data, on) => {
+            if (on) {
+              return `<div style="background-color:#${data}"></div>`;
+            } else {
+              return "";
+            }
           };
           break;
   

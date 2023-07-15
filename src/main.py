@@ -7,7 +7,7 @@ import os
 sys.path.insert(1, os.path.abspath('../../home-automation/home_automation'))
 import home_automation
 
-dir()
+# dir()
 
 app = Flask(__name__)
 

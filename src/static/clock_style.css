@@ -2,6 +2,7 @@ body {
   margin: 0px;
   cursor: none;
   user-select: none;
+  /* background-color: black; */
 }
 
 #container {
@@ -12,19 +13,21 @@ body {
 
   background-image: url('images/bg-stripe.png');
   background-size: 3.6em;
-  background-position: 0em 1em;
+  background-position: 0em 1.65em;
 
-  box-shadow: inset 0 0 2em .1em rgba(240,240,255,.3),
+  box-shadow: inset 0 0 2em .1em rgba(240,240,255,.15),
               inset 0 0 5em 0em rgba(0,150,255,.3);
 }
 
 #clock {
-  color: rgb(220,220,255);
+  color: rgb(220,240,255);
   font-family: "WarGames";
   font-size: 12em;
+  position: relative;
+  top: 1rem; /* centers text vertically */
 
-  --widthFac: .7;
-  --opacityFac: 1.3;
+  --widthFac: .9;
+  --opacityFac: 2;
   --blurFac: 0.5;
 
   /* text-shadow: -.2em 0em 0em magenta, .2em 0em 0em green; */
