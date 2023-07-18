@@ -33,3 +33,36 @@ body {
     );
     --bg_color_off: linear-gradient(to right, hsl(29, 65%, 75%) 30%, /*hsl(0, 0%, 85%) 62.5%,*/ hsl(222, 65%, 70%) 75%);
   }
+
+  #color_picker_container {
+    display: grid;
+    gap: .5em;
+    margin: .25em;
+  }
+
+  #cp_canvas_container {
+    position: relative;
+    box-sizing: content-box;
+    --width: 600px;
+    --height: 200px;
+    width: var(--width);
+    height: var(--height);
+    border: 12px solid rgb(127,127,127);
+    border-radius: 12px;
+  }
+
+  #cp_canvas {
+    width: var(--width);
+    height: var(--height);
+  }
+
+  #cp_indicator {
+    position: absolute;
+    --diameter: 25px;
+    width: var(--diameter);
+    height: var(--diameter);
+    border: calc(var(--diameter)/4) solid black;
+    border-radius: var(--diameter);
+    box-sizing: border-box;
+    transform: translate(calc(var(--diameter)/-2),calc(var(--diameter)/-2));
+  }

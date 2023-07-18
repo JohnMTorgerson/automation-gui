@@ -27,7 +27,8 @@ body {
   justify-items: stretch;
   align-items: stretch;
 
-  background-image: linear-gradient(180deg,rgba(50,255,50,.1) 20%, rgba(50,255,50,.3) 100%);
+  /* background-image: linear-gradient(180deg,rgba(50,255,50,.1) 20%, rgba(50,255,50,.3) 100%); */
+  background-image: linear-gradient(180deg,rgba(50,255,50,.2) 20%, rgba(134, 68, 255, 0.3) 100%);
   --stripeSize: .9rem;
 }
 
@@ -45,11 +46,13 @@ body {
 }
 
 #top {
+  /* display:none; */
   text-align: center;
   /* font-family: 'Unlearned'; */
   font-family: "WarGames";
   /* text-transform: lowercase; */
-  color: rgba(20,200,20,1);
+  /* color: rgba(20,200,20,1); */
+  color: rgba(0,200,0,1);
   font-size: 1.5em;
   z-index: 0;
 }
@@ -179,36 +182,38 @@ body {
 }
 
 .scene_widget#color {
-  box-shadow: inset 0 0 1em .2em rgba(130,0,150,.4);
+  /* box-shadow: inset 0 0 1em .2em rgba(130,0,150,.4); */
 
   --lightness: 40%;
   
-  background: linear-gradient(35deg,  
-    hsl(0, 100%, calc(var(--lightness) * 1.30)) 8%,
-    hsl(15, 100%, calc(var(--lightness) * 1.10)),
+  /* manual percentage-stops and deviations from the commented-out values make it look worse on my dev monitor */
+  /* but they look better on the rpi touchscreen, so we'll go with them */
+  background-image: linear-gradient(25deg,  
+    hsl(350, 100%, calc(var(--lightness) * 1.00)) 8%, /* 0 1.30 */
+    hsl(15, 100%, calc(var(--lightness) * 1.01)), /* 1.10 */
     hsl(35, 100%, calc(var(--lightness) * 1.02)),
     hsl(48, 100%, calc(var(--lightness) * 0.90)),
     hsl(60, 100%, calc(var(--lightness) * .76)),
     hsl(72, 100%, calc(var(--lightness) * .71)),
-    hsl(90, 100%, calc(var(--lightness) * .70)) 37%,
+    hsl(90, 100%, calc(var(--lightness) * .70)) 42%,
     hsl(105, 100%, calc(var(--lightness) * .70)),
     hsl(120, 100%, calc(var(--lightness) * .695)),
     hsl(135, 100%, calc(var(--lightness) * .70)),
     hsl(150, 100%, calc(var(--lightness) * .70)),
     hsl(165, 100%, calc(var(--lightness) * .69)),
-    hsl(180, 100%, calc(var(--lightness) * .70)) /*50%*/, /* .65 for 50% */
-    hsl(195, 100%, calc(var(--lightness) * .85)) 57%, /* 80% .85 for 50% */
-    hsl(215, 90%, calc(var(--lightness) * 1.25)), /* 75% sat for 50% */
-    hsl(225, 85%, calc(var(--lightness) * 1.40)), /* 90% sat for 50% */
-    hsl(240, 100%, calc(var(--lightness) * 1.62)), /* 100% 1.48 for 50% */
-    hsl(255, 100%, calc(var(--lightness) * 1.54)), /* 100% 1.44 for 50% */
-    hsl(270, 100%, calc(var(--lightness) * 1.40)), /* 1.35 for 50% */
-    hsl(285, 100%, calc(var(--lightness) * 1.15)),
-    hsl(300, 90%, calc(var(--lightness) * .95)), /* .89 for 50% */
-    hsl(315, 80%, calc(var(--lightness) * 1.05)), /* .98 for 50% */
-    hsl(330, 90%, calc(var(--lightness) * 1.12)),
-    hsl(345, 95%, calc(var(--lightness) * 1.21)),
-    hsl(360, 100%, calc(var(--lightness) * 1.30)) 95%
+    hsl(180, 100%, calc(var(--lightness) * .70)), /* .65 */
+    hsl(195, 100%, calc(var(--lightness) * .85)) 57%, /* 80% .85 */
+    hsl(215, 90%, calc(var(--lightness) * 1.25)), /* 75% sat */
+    hsl(225, 85%, calc(var(--lightness) * 1.40)), /* 90% sat */
+    hsl(240, 93%, calc(var(--lightness) * 1.62)), /* 100% 1.48 */
+    hsl(255, 100%, calc(var(--lightness) * 1.57)), /* 100% 1.44 */
+    hsl(270, 100%, calc(var(--lightness) * 1.45)) 67%, /* 270 1.35 */
+    hsl(285, 100%, calc(var(--lightness) * 1.17)), /* 1.15 */
+    hsl(300, 100%, calc(var(--lightness) * .98)), /* 90% .89 */
+    hsl(315, 100%, calc(var(--lightness) * 1.05)), /* 80% .98 */
+    hsl(330, 100%, calc(var(--lightness) * 1.12)), /* 90% sat */
+    hsl(345, 100%, calc(var(--lightness) * 1.06)), /* 95% 1.21 */
+    hsl(360, 100%, calc(var(--lightness) * 1.00)) 90% /* 1.30 */
   ) !important;
 }
 
@@ -255,11 +260,11 @@ body {
   --opacityFac: .3;
 
   text-shadow:
-               0 0 .1em rgba(200,200,255,.8),
-               calc(-.03em * var(--widthFac)) -.005em .03em rgba(255, 255, 100, calc(.4 * var(--opacityFac))), /* yellow */
-               calc(-.09em * var(--widthFac)) -.005em .02em rgba(200, 0,   0,   calc(.6 * var(--opacityFac))), /* red */
-               calc(.04em * var(--widthFac))  .005em  .03em rgba(150, 255, 255, calc(.5 * var(--opacityFac))), /* cyan */
-               calc(.09em * var(--widthFac))  .005em  .02em rgba(75,  0,   255, calc(.8 * var(--opacityFac))), /* blue/violet */
-               0 0 .1em rgba(100,100,255,1);
+    0 0 .1em rgba(200,200,255,.8),
+    calc(-.03em * var(--widthFac)) -.005em .03em rgba(255, 255, 100, calc(.4 * var(--opacityFac))), /* yellow */
+    calc(-.09em * var(--widthFac)) -.005em .02em rgba(200, 0,   0,   calc(.6 * var(--opacityFac))), /* red */
+    calc(.04em * var(--widthFac))  .005em  .03em rgba(150, 255, 255, calc(.5 * var(--opacityFac))), /* cyan */
+    calc(.09em * var(--widthFac))  .005em  .02em rgba(75,  0,   255, calc(.8 * var(--opacityFac))), /* blue/violet */
+    0 0 .1em rgba(100,100,255,1);
 
 }

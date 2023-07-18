@@ -10,27 +10,27 @@ import ColorControls from './ColorControls.mjs';
         // since the server was last polled, we need to update the server with the changes
         // before getting updated data from it
         if (colorCtrls.changed) {
-        console.log("control change occurred, sending to server to save to file...")
+            console.log("control change occurred, sending to server to save to file...")
 
-        // send update to server to save to file
-        const fetchRequest = {
-            cache: "no-cache",
-            method: "POST",
-            headers: {
-            'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(colorCtrls.data["settings"])
-        }
+            // change the flag back to false
+            colorCtrls.changed = false;
 
-        let response = await fetch('/color_control',fetchRequest);
-        if (response.ok) {
-            console.log("...sent to server");
-        } else {
-            console.log(response.status)
-        }
+            // send update to server to save to file
+            const fetchRequest = {
+                cache: "no-cache",
+                method: "POST",
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(colorCtrls.data["settings"])
+            }
 
-        // change the flag back to false
-        colorCtrls.changed = false;
+            let response = await fetch('/color_control',fetchRequest);
+            if (response.ok) {
+                console.log("...sent to server");
+            } else {
+                console.log(response.status)
+            }
         }
 
 

@@ -1,4 +1,5 @@
-from configure_logging import logger
+import configure_logging
+logger = configure_logging.configure(__name__)
 from flask import Flask, render_template, url_for, request, jsonify, make_response
 import datetime
 import json
@@ -6,6 +7,8 @@ import sys
 import os
 sys.path.insert(1, os.path.abspath('../../home-automation/home_automation'))
 import home_automation
+from helpers import object_equals
+import copy
 
 # dir()
 
@@ -84,16 +87,23 @@ def sunlight_update():
 # relay control changes back to the automation controller
 @app.route('/sunlight_control', methods=['POST'])
 def sunlight_control(obj=None):
+    logger.debug("#######################sunlight_control######################")
     logger.debug("receiving sunlight control change from UI, writing to file...")
 
-    if obj is not None:
-        settingsUpdate = obj
-        reciprocate = False
+    if obj is None:
+        # the normal case in which no argument was passed because we got here from a post request
+        settings_update = request.get_json()
+        toggle_color = True
     else:
-        settingsUpdate = request.get_json()
-        reciprocate = True
+        # the abnormal case, in which this function was called within python
+        # from color_control() with an obj argument provided;
+        # in this case, we need to update the sunlight settings WITHOUT
+        # toggling the color scene to the opposite "on" state
+        settings_update = obj
+        toggle_color = False
 
-    logger.debug(f"updated sunlight settings requested by user are:\n{json.dumps(settingsUpdate)}")
+
+    logger.debug(f"updated sunlight settings requested by user are:\n{json.dumps(settings_update)}")
 
     # first, write settings update to the data.json file that we poll for updates
     try:
@@ -103,12 +113,12 @@ def sunlight_control(obj=None):
             # check if "on" setting has changed
             old_on = data["scenes"]["sunlight"]["settings"]["on"]
             try:
-                new_on = settingsUpdate["on"]
+                new_on = settings_update["on"]
             except KeyError as e:
                 new_on = old_on
 
             # merge update
-            data["scenes"]["sunlight"]["settings"] |= settingsUpdate
+            data["scenes"]["sunlight"]["settings"] |= settings_update
 
             # delete file contents
             f.seek(0)
@@ -128,7 +138,7 @@ def sunlight_control(obj=None):
     try:
         with open(f"{home_auto_path}/scenes/timebased/sunlight/settings.json", "r+") as f :
             settings = json.load(f)
-            settings |= settingsUpdate
+            settings |= settings_update
 
             # delete file contents
             f.seek(0)
@@ -145,10 +155,10 @@ def sunlight_control(obj=None):
 
     # if the sunlight scene is set to 'on', turn off the color scene
     # i.e. the color scene needs to be off if sunlight is on, but not vice versa
-    #   (the 'reciprocate' flag is false if we were passed data through the 'obj' param, because that only happens
+    #   (the 'toggle_color' flag is false if we were passed data through the 'obj' param, because that only happens
     #   if the color scene was turned off/on and is itself reciprocating to us,
     #   in which case we don't need to tell it to do anything)
-    if reciprocate and new_on is True:
+    if toggle_color and new_on:
         color_control(obj={"on": False})
 
     # run the actual scene!!!
@@ -191,31 +201,36 @@ def color_update():
 # relay control changes back to the automation controller
 @app.route('/color_control', methods=['POST'])
 def color_control(obj=None):
+    logger.debug("!!!!!!!!!!!!!!!!!color_control!!!!!!!!!!!!!!!!!!!!")
     logger.debug("receiving color control change from UI, writing to file...")
 
-    if obj is not None:
-        reciprocate = False
-        settingsUpdate = obj
+    if obj is None:
+        # the normal case in which no argument was passed because we got here from a post request
+        toggle_sunlight = True
+        settings_update = request.get_json()
     else:
-        reciprocate = True
-        settingsUpdate = request.get_json()
+        # the abnormal case, in which this function was called within python with an obj argument provided
+        toggle_sunlight = False
+        settings_update = obj
 
-    logger.debug(f"updated color settings requested by user:\n{json.dumps(settingsUpdate)}")
+    logger.debug(f"\ntoggle_sunlight: {toggle_sunlight}\nsettings_update: {json.dumps(settings_update)}")
+
+    # logger.debug(f"updated color settings requested by user:\n{json.dumps(settings_update)}")
 
     # first, write settings update to the data.json file that we poll for updates
     try:
         with open(f"{home_auto_path}/data.json", "r+") as f :
             data = json.load(f)
 
-            # check if "on" setting has changed
-            old_on = data["scenes"]["color"]["settings"]["on"]
-            try:
-                new_on = settingsUpdate["on"]
-            except KeyError as e:
-                new_on = old_on
-
+            # to later check if settings have changed
+            old_settings = copy.deepcopy(data["scenes"]["color"]["settings"])
+            
             # merge update
-            data["scenes"]["color"]["settings"] |= settingsUpdate
+            data["scenes"]["color"]["settings"] |= settings_update
+
+            # to later check if settings have changed
+            new_settings = data["scenes"]["color"]["settings"]
+
 
             # delete file contents
             f.seek(0)
@@ -235,7 +250,7 @@ def color_control(obj=None):
     try:
         with open(f"{home_auto_path}/scenes/basic/color/settings.json", "r+") as f :
             settings = json.load(f)
-            settings |= settingsUpdate
+            settings |= settings_update
 
             # delete file contents
             f.seek(0)
@@ -252,15 +267,18 @@ def color_control(obj=None):
 
     # if the on/off state of the color scene has changed, change the sunlight scene to the opposite state
     # i.e. the sunlight scene needs to be off if color is on, and vice versa;
-    #   (the 'reciprocate' flag is false if we were passed data through the 'obj' param, because that only happens
+    #   (the 'toggle_sunlight' flag is false if we were passed data through the 'obj' param, because that only happens
     #   if the sunlight scene was turned off/on and is itself reciprocating to us,
     #   in which case we don't need to tell it to do anything)
-    if reciprocate and new_on != old_on:
-        sunlight_control(obj={"on": not new_on})
+    if toggle_sunlight and new_settings["on"] != old_settings["on"]:
+        sunlight_control(obj={"on": not new_settings["on"]})
 
-        # run the actual scene!!!
-        if new_on is True:
-            home_automation.color_scene()
+    # logger.debug(f"old: {old_settings}\nnew: {new_settings}")
+    # logger.debug(f"object_equals: {object_equals(new_settings,old_settings)}")
+
+    # run the actual scene!!!
+    if new_settings["on"] is True and not object_equals(new_settings,old_settings):
+        home_automation.color_scene()
 
 
     return jsonify(settings)
@@ -293,15 +311,15 @@ def thermostat_update():
 @app.route('/thermostat_control', methods=['POST'])
 def thermostat_control():
     logger.debug("receiving thermostat control change from UI, writing to file...")
-    settingsUpdate = request.get_json()
-    logger.debug(f"updated settings requested by user:\n{json.dumps(settingsUpdate)}")
+    settings_update = request.get_json()
+    logger.debug(f"updated settings requested by user:\n{json.dumps(settings_update)}")
 
 
     # first, write settings update to the data.json file that we poll for updates
     try:
         with open(f"{home_auto_path}/data.json", "r+") as f :
             data = json.load(f)
-            data["scenes"]["thermostat"]["settings"] |= settingsUpdate
+            data["scenes"]["thermostat"]["settings"] |= settings_update
 
             # delete file contents
             f.seek(0)
@@ -321,7 +339,7 @@ def thermostat_control():
     try:
         with open(f"{home_auto_path}/scenes/basic/thermostat/settings.json", "r+") as f :
             settings = json.load(f)
-            settings |= settingsUpdate
+            settings |= settings_update
 
             # delete file contents
             f.seek(0)
@@ -358,4 +376,4 @@ def clock_update():
 
 
 if __name__ == '__main__':
-   app.run(debug=True)
+   app.run(debug=False,use_reloader=True)

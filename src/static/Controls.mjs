@@ -78,8 +78,8 @@ export default class Controls {
     //   humLabel.style.lineHeight = this.rect.left + 'px'; // same as width, because we're using vertical text
     //   humLabel.style.height = this.rect.height + 'px';//container.offsetHeight + 'px';
   
-      const switch_btn = document.querySelector("#onoff_switch");
-      switch_btn.style.left = (this.rect.left + this.rect.width/2) + 'px';
+      // const switch_btn = document.querySelector("#onoff_switch");
+      // switch_btn.style.left = (this.rect.left + this.rect.width/2) + 'px';
     }
   
     // set mouse events for touchscreen interaction

@@ -20,9 +20,15 @@
         <div class="switch_inner"></div>
       </div>
     </div>
-    <div id="color_form" class="controls">
-        <input type="text"/>
-        <button>Enter</button>
+    <div id="color_picker_container">
+        <div id="cp_canvas_container">
+            <canvas id="cp_canvas" width="600" height="200"></canvas>
+            <div id="cp_indicator"></div>
+        </div>
+        <div id="cp_form" class="controls">
+            <input type="text"/>
+            <button class="button">Enter</button>
+        </div>    
     </div>
     <!-- <div id="brightness_controls" class="controls">
       <div class="label">bright</div>

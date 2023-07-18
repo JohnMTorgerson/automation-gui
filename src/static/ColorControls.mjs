@@ -1,15 +1,18 @@
+import ColorPicker from "./ColorPicker.mjs";
 import Controls from "./Controls.mjs";
 
 export default class ColorControls extends Controls {
     constructor(data) {
         super(data);
 
-        this.inputEl = document.querySelector("#color_form input");
+        this.inputEl = document.querySelector("#cp_form input");
         try {
             this.inputEl.value = this.data.settings.color;
         } catch(e) {
             // no data was passed to the constructor (or data.settings.color does not exist)
         }
+
+        this.colorPicker = new ColorPicker(document.getElementById("cp_canvas"),this);
 
         this.firstUpdate = true;
     }
@@ -55,8 +58,8 @@ export default class ColorControls extends Controls {
     super.setEvents();
 
     // control buttons
-    document.querySelector("#color_form button").addEventListener("click", (e) => {
-        // console.log(`clicked on input, value is: ${this.inputEl.value}`);
+    document.querySelector("#cp_form button").addEventListener("click", (e) => {
+        console.log(`clicked on input, value is: ${this.inputEl.value}`);
         this.btnClick(e,'color',this.inputEl.value);
     });
 
