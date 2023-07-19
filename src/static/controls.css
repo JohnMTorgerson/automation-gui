@@ -55,6 +55,9 @@
 }
   
 .button {
+    --color: rgba(50,255,50,1);
+    --color_faded: rgba(50,255,50,.5);
+    
     /* display:inline-block; */
     border-width: 0.15em;
     border-radius: .5em;
@@ -131,8 +134,6 @@
 }
   
 #onoff_switch {
-    --color: rgba(50,255,50,1);
-    --color_faded: rgba(50,255,50,.5);
     --bg_color_on: rgba(255,50,200,.5);
     --bg_color_off: transparent;
   

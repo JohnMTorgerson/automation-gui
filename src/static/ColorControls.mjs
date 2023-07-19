@@ -12,7 +12,7 @@ export default class ColorControls extends Controls {
             // no data was passed to the constructor (or data.settings.color does not exist)
         }
 
-        this.colorPicker = new ColorPicker(document.getElementById("cp_canvas"),this);
+        this.colorPicker = new ColorPicker(this);
 
         this.firstUpdate = true;
     }

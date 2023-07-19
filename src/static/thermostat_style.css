@@ -49,19 +49,25 @@ canvas {
   background: linear-gradient(180deg, rgba(0,0,0,.5) 1.5em, rgba(0,0,0,0.85) 2.5em);
 }
 
-#temp_controls {
+#temp_controls,
+#temp_controls .button {
   --color: rgba(50,255,50,1);
   --color_faded: rgba(50,255,50,.5);
   --opacity_factor: .7;
   --opacity_factor_less: .9;
+}
+#temp_controls {
   width: 50%;
 }
 
-#hum_controls {
+#hum_controls,
+#hum_controls .button {
   --color: rgba(255,50,200,1);
   --color_faded: rgba(255,50,200,.5);
   --opacity_factor: 1;
   --opacity_factor_less: 1;
+}
+#hum_controls {
   width: 50%;
 }
 

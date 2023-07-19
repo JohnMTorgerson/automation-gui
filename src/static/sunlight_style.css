@@ -63,7 +63,10 @@ body {
 }
 
 #onoff_switch {
+  --bg_color_on: rgba(248,137,36,.5); /* rgba(247,104,11,.5);*/
+}
+
+.button {
   --color: rgba(92,178,255,1); /*rgba(112,156,255,1);*/
   --color_faded: rgba(112,156,255,.5);
-  --bg_color_on: rgba(248,137,36,.5); /* rgba(247,104,11,.5);*/
 }

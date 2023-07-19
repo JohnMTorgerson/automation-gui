@@ -21,9 +21,15 @@
       </div>
     </div>
     <div id="color_picker_container">
-        <div id="cp_canvas_container">
-            <canvas id="cp_canvas" width="600" height="200"></canvas>
-            <div id="cp_indicator"></div>
+        <div id="cp_color_editor_container">
+            <div id="cp_colors_canvas_container" class="button">
+                <canvas id="cp_colors_canvas" width="650" height="150"></canvas>
+                <div id="cp_colors_indicator"></div>
+            </div>
+            <div id="cp_brightness_canvas_container" class="button">
+                <canvas id="cp_brightness_canvas" width="50" height="150"></canvas>
+                <div id="cp_brightness_indicator"></div>
+            </div>
         </div>
         <div id="cp_form" class="controls">
             <input type="text"/>

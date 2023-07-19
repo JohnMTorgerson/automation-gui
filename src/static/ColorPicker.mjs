@@ -1,76 +1,265 @@
 export default class ColorPicker {
-    constructor(canvas,controller) {
+    constructor(controller) {
         this.controller = controller; // a reference to the ColorControls object
-        this.canvas = canvas; // the canvas element
-        this.ctx = this.canvas.getContext("2d"); // canvas context
-        this.indicator = document.getElementById("cp_indicator");
-        this.indicatorPos = {x:250,y:100}
-        this.canvasContainer = document.getElementById("cp_canvas_container");
+        this.editorColor = {str:""}; // the color representing the current state of the color editor
+        this.editorBrightness = 100; // the brightness representing the current state of the brightness editor
+
+        // colors editor
+        this.ce = {};
+        this.ce.canvasContainer = document.getElementById("cp_colors_canvas_container");
+        this.ce.canvas = document.getElementById("cp_colors_canvas"); // the canvas element
+        this.ce.ctx = this.ce.canvas.getContext("2d"); // canvas context
+        this.ce.indicator = document.getElementById("cp_colors_indicator");
+        this.ce.indicatorPos = {x:0,y:0};
+
+        // brightness editor
+        this.be = {};
+        this.be.canvasContainer = document.getElementById("cp_brightness_canvas_container");
+        this.be.canvas = document.getElementById("cp_brightness_canvas"); // the canvas element
+        this.be.ctx = this.be.canvas.getContext("2d"); // canvas context
+        this.be.indicator = document.getElementById("cp_brightness_indicator");
+        this.be.indicatorPos = 0;
+        this.be.colorStr = "black";
+
 
         this.initialize();
     }
 
     initialize() {
-        // this.ctx.lineWidth = 3;
-        // this.ctx.strokeStyle = "black";
-        let rect = this.canvas.getBoundingClientRect();
-        // console.log(JSON.stringify(rect));
+        // =========== set editor to saved color, if received =========== //
+        try {
+            // let hex = this.controller.data.settings.color;
+            // let brightness = this.controller.data.settings.brightness
+            let hex = '#00ffff';
+            let rgb = this.HEXtoRGB(hex);
+            let hsl = this.RGBtoHSL(rgb);
+            console.log(JSON.stringify(hex));
+            console.log(JSON.stringify(rgb));
+            console.log(JSON.stringify(hsl));
 
-        // console.log(`width: ${this.canvas.width}, height: ${this.canvas.height}`);
+            let brightness = 75;
 
-        this.canvasContainer.addEventListener("mousedown", (e) => {
+            this.updateColorsEditor(this.getPositionFromColor(this.HEXtoHSL(hex)));
+        } catch(e) {
+            // no settings yet
+            console.log(`Could not set initial indicator position: ${e}`);
+        }
+
+        // =========== set some styles =========== //
+        this.ce.canvas.style.width = this.ce.canvas.width + 'px';
+        this.ce.canvas.style.height = this.ce.canvas.height + 'px';
+        this.ce.canvasContainer.style.width = this.ce.canvas.width + 'px';
+        this.ce.canvasContainer.style.height = this.ce.canvas.height + 'px';
+        this.be.canvas.style.width = this.be.canvas.width + 'px';
+        this.be.canvas.style.height = this.be.canvas.height + 'px';
+        this.be.canvasContainer.style.width = this.be.canvas.width + 'px';
+        this.be.canvasContainer.style.height = this.be.canvas.height + 'px';
+
+
+        // =========== set events =========== //
+        this.ce.canvasContainer.addEventListener("mousedown", (e) => {
             e.stopPropagation();
             this.mouseDown = true;
-            this.indicatorPos = {x: e.offsetX, y: e.offsetY}
-            this.drawIndicator();
-    });
+            this.updateColorsEditor({x:e.offsetX,y:e.offsetY});
+        });
         window.addEventListener("mouseup", (e) => {
             e.stopPropagation();
             this.mouseDown = false;
         });
+        let rect = this.ce.canvas.getBoundingClientRect();
         window.addEventListener("mousemove", (e) => {
             if (this.mouseDown) {
-                this.indicatorPos = {x: e.pageX-rect.x, y: e.pageY-rect.y}
-                this.drawIndicator();
+                this.updateColorsEditor({x:e.pageX-rect.x,y:e.pageY-rect.y});
             }
         });
-        this.canvasContainer.addEventListener("click", (e) => {
+        this.ce.canvasContainer.addEventListener("click", (e) => {
             e.stopPropagation(); // so as not to close the controls pane
             this.controller.showControls(); // to update the inactivity timeout which hides the control pane
         });
 
-
+        // =========== draw editor initial state =========== //
         this.drawColors();
-        this.drawIndicator();
     }
 
     drawColors() {
-        let width = this.canvas.width - 1;
-        let height = this.canvas.height - 1;
+        let width = this.ce.canvas.width - 1;
+        let height = this.ce.canvas.height - 1;
         for (let x=0; x<=width; x++) {
             let h = (x / width * 360).toFixed(3); // hue
             for (let y=0; y<=height; y++) {
                 let l = ((1 - y / height) / 2 * 100 + 50).toFixed(3); // lightness
                 // let l = ((1 - y / height) * 100).toFixed(3); // lightness
                 // if (x==0) console.log(`hsl(${h} 100% ${l}%)`);
-                this.ctx.fillStyle = `hsl(${h} 100% ${l}%)`;
-                this.ctx.fillRect(x, y, 1, 1);
+                this.ce.ctx.fillStyle = `hsl(${h} 100% ${l}%)`;
+                this.ce.ctx.fillRect(x, y, 1, 1);
             }
         }
-        // this.colorPickerImage = this.canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+        // this.colorPickerImage = this.ce.canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     }
 
-    drawIndicator() {
-        console.log(`drawing indicator at: ${JSON.stringify(this.indicatorPos)}`);
-        // this.ctx.beginPath();
-        // this.ctx.arc(this.clamp(this.indicatorPos.x,0,this.canvas.width-1), this.clamp(this.indicatorPos.y,0,this.canvas.height-1), 6, 0, 2 * Math.PI);
-        // this.ctx.stroke();
-        this.indicator.style.left = this.clamp(this.indicatorPos.x,0,this.canvas.width) + 'px';
-        this.indicator.style.top  = this.clamp(this.indicatorPos.y,0,this.canvas.height) + 'px';
+    updateColorsEditor(position) {
+        // clamp position
+        position = {x: this.clamp(position.x,0,this.ce.canvas.width-1), y: this.clamp(position.y,0,this.ce.canvas.height-1)};
+
+        // get and store color
+        this.editorColor = this.getColorFromPosition(position);
+
+        // move indicator
+        this.ce.indicatorPos = {...position};
+        this.ce.indicator.style.left = this.ce.indicatorPos.x + 'px';
+        this.ce.indicator.style.top  = this.ce.indicatorPos.y + 'px';
+
+        // update color on various elements
+        this.ce.canvasContainer.style.borderColor = this.editorColor.str;
+        this.ce.indicator.style.backgroundColor = this.editorColor.str;
+        let shadowAlpha = '0.3';
+        let shadowColor = `hsl(${this.editorColor.hue} ${this.editorColor.saturation}% ${this.editorColor.lightness}% / ${shadowAlpha}`;
+        this.ce.canvasContainer.style.boxShadow = `0 0 .3em .05em ${shadowColor}`;
+
+        // update the brightness editor as well (its background changes to match the selected color)
+        this.updateBrightnessEditor();
+    }
+
+    updateBrightnessEditor({position,brightness}={}) {
+        // console.log('updateBrightnessEditor()...');
+
+        // depending on whether position or brightness was passed to us,
+        // derive the other
+        if (position) {
+            // console.log("...by position");
+            position = this.clamp(position,0,this.be.canvas.height-1);
+            brightness = (1 - position / (this.be.canvas.height - 1)) * 100;
+        } else if (brightness) {
+            // console.log("...by brightness");
+            position = (100 - brightness) / 100 * (this.be.canvas.height - 1);
+        }
+
+        // store values if either one was given
+        if (position || brightness) {
+            this.be.indicatorPos = position;
+            this.be.editorBrightness = brightness;
+        }
+
+        // move indicator
+        this.be.indicator.style.top = this.be.indicatorPos + 'px';
+
+        // draw gradient bg if color has changed
+        if (this.editorColor.str != this.be.colorStr) {
+            // console.log(`...updating bg (this.editorColor.str == ${this.editorColor.str}, this.be.colorStr == ${this.be.colorStr})`);
+            
+            this.be.colorStr = this.editorColor.str;
+            const grd = this.be.ctx.createLinearGradient(0, 0, 0, this.be.canvas.height);
+            grd.addColorStop(0, this.be.colorStr);
+            grd.addColorStop(1, "black");
+            this.be.ctx.fillStyle = grd;
+            this.be.ctx.fillRect(0, 0, this.be.canvas.width, this.be.canvas.height);
+        }
+    }
+
+    drawColorsIndicator() {
+        // console.log(`drawing indicator at: ${JSON.stringify(this.ce.indicatorPos)}`);
+        // this.ce.ctx.beginPath();
+        // this.ce.ctx.arc(this.clamp(this.ce.indicatorPos.x,0,this.ce.canvas.width-1), this.clamp(this.ce.indicatorPos.y,0,this.ce.canvas.height-1), 6, 0, 2 * Math.PI);
+        // this.ce.ctx.stroke();
+    }
+
+    // position param should be an object of form {x:[number],y:[number]}
+    getColorFromPosition(position) {
+        let width = this.ce.canvas.width - 1;
+        let height = this.ce.canvas.height - 1;
+        let h = (position.x / width * 360).toFixed(3); // hue
+        let s = 100;
+        let l = ((1 - position.y / height) / 2 * 100 + 50).toFixed(3); // lightness
+        return {
+            hue: h,
+            saturation: s,
+            lightness: l,
+            str: `hsl(${h} ${s}% ${l}%)`
+        };
+    }
+
+    // color param should be an object of form {hue:[number], saturation:[number], lightness:[number]} (with opt 'str' property)
+    getPositionFromColor(hsl) {
+        let h = hsl.hue % 360;
+        let l = this.clamp(hsl.lightness,50,100); //Math.abs(hsl.lightness - 50) + 50;
+
+        let x = h / 360 * (this.ce.canvas.width-1);
+        let y = (1 - (l - 50) / 100 * 2) * (this.ce.canvas.height-1);
+        return {x:x,y:y}
     }
   
+    HEXtoHSL(hex) {
+        return this.RGBtoHSL(this.HEXtoRGB(hex));
+    }
+
+    HEXtoRGB(hex) {
+        hex = hex.replace('#','');
+        let red = parseInt(hex.substring(0,2),16);
+        let green = parseInt(hex.substring(2,4),16);
+        let blue = parseInt(hex.substring(4,6),16);
+        // console.log(`\nred: ${red}\ngrn: ${green}\nblu: ${blue}`);
+
+        return {
+            red: red,
+            green: green,
+            blue: blue,
+            str: `rgb(${red},${green},${blue})`
+        };
+    }
+
+    RGBtoHSL(rgb) {
+        // borrowed (and modified) from https://www.w3schools.com/lib/w3color.js
+        /* w3color.js ver.1.18 by w3schools.com (Do not remove this line) */
+        let r = rgb.red;
+        let g = rgb.green;
+        let b = rgb.blue;
+
+        var min, max, i, l, s, maxcolor, h, rgb = [];
+        rgb[0] = r / 255;
+        rgb[1] = g / 255;
+        rgb[2] = b / 255;
+        min = rgb[0];
+        max = rgb[0];
+        maxcolor = 0;
+        for (i = 0; i < rgb.length - 1; i++) {
+            if (rgb[i + 1] <= min) {min = rgb[i + 1];}
+            if (rgb[i + 1] >= max) {max = rgb[i + 1];maxcolor = i + 1;}
+        }
+        if (maxcolor == 0) {
+            h = (rgb[1] - rgb[2]) / (max - min);
+        }
+        if (maxcolor == 1) {
+            h = 2 + (rgb[2] - rgb[0]) / (max - min);
+        }
+        if (maxcolor == 2) {
+            h = 4 + (rgb[0] - rgb[1]) / (max - min);
+        }
+        if (isNaN(h)) {h = 0;}
+        h = h * 60;
+        if (h < 0) {h = h + 360; }
+        l = (min + max) / 2;
+        if (min == max) {
+            s = 0;
+        } else {
+            if (l < 0.5) {
+                s = (max - min) / (max + min);
+            } else {
+                s = (max - min) / (2 - max - min);
+            }
+        }
+        s = s * 100;
+        l = l * 100;
+
+        return {
+            hue: h,
+            saturation: s,
+            lightness: l,
+            str: `hsl(${h} ${s}% ${l}%)`
+        };
+    }
+
     clamp(num, min, max) {
         return Math.min(Math.max(num, min), max);
     }
-  }
+}
   
