@@ -2,6 +2,7 @@ export default class Controls {
     constructor(data) {
       this.data = data; // JSON data read from home-automation, with sensor history, weather data, settings, etc.
       this.ctrlChange = {}; // data should be an object, with key/value pairs corresponding with those in settings.json in the automation controller
+      this.showing = false; // whether the controls are showing or hidden
 
       try { // get main canvas bounding rect and container element
         this.container = document.querySelector("#canvas_container");
@@ -114,6 +115,7 @@ export default class Controls {
     showControls(e) {
       const controls = document.getElementById("controls_container");
       controls.classList.add("show");
+      this.showing = true;
   
       // auto hide the controls after so many seconds of inactivity
       clearTimeout(this.hideDelay);
@@ -123,6 +125,7 @@ export default class Controls {
     hideControls(e) {
       const controls = document.getElementById("controls_container");
       controls.classList.remove("show");
+      this.showing = false;
     }
   
     btnClick(e,prop,input) {

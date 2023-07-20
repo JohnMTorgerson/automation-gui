@@ -1,6 +1,8 @@
 export default class ColorPicker {
     constructor(controller) {
         this.controller = controller; // a reference to the ColorControls object
+        try { this.settings = this.controller.data.settings; } // settings from the color scene (containing stored color and brightness values, and on/off value)
+        catch(e) { this.settings = {color:null, brightness:null} } // if none were passed in the constructor, use null
         this.editorColor = {str:""}; // the color representing the current state of the color editor
         this.editorBrightness = 100; // the brightness representing the current state of the brightness editor
 
@@ -21,23 +23,23 @@ export default class ColorPicker {
         this.be.indicatorPos = 0;
         this.be.colorStr = "black";
 
+        this.hexInput = document.getElementById("cp_hex_input");
+        this.saveBtn = document.getElementById("cp_save_btn");
 
-        this.initialize();
+
+        this.create();
     }
 
-    initialize() {
+    create() {
         // =========== set editor to saved color, if received =========== //
         try {
-            // let hex = this.controller.data.settings.color;
-            // let brightness = this.controller.data.settings.brightness
-            let hex = '#00ffff';
+            let hex = this.settings.color;
+            let brightness = this.settings.brightness;
             let rgb = this.HEXtoRGB(hex);
             let hsl = this.RGBtoHSL(rgb);
             console.log(JSON.stringify(hex));
             console.log(JSON.stringify(rgb));
             console.log(JSON.stringify(hsl));
-
-            let brightness = 75;
 
             this.updateColorsEditor(this.getPositionFromColor(this.HEXtoHSL(hex)));
         } catch(e) {
@@ -81,6 +83,17 @@ export default class ColorPicker {
         this.drawColors();
     }
 
+    // set editor to reflect the settings values
+    initializeValuesFromSettings() {
+        try {
+            this.updateColorsEditor(this.getPositionFromColor(this.HEXtoHSL(this.settings.color)));
+            this.updateBrightnessEditor({brightness: this.settings.brightness});
+            this.updateHexInput(this.settings.color);
+        } catch(e) {
+            console.error(`ColorPicker unable to initialize values from settings due to error: ${e}`);
+        }
+    }
+
     drawColors() {
         let width = this.ce.canvas.width - 1;
         let height = this.ce.canvas.height - 1;
@@ -97,7 +110,32 @@ export default class ColorPicker {
         // this.colorPickerImage = this.ce.canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
     }
 
+    updateSettings(settings) {
+        this.settings = {...settings};
+    }
+
+    updateHexInput(color) {
+        console.log(`color: ${JSON.stringify(color)}`);
+        let hex;
+        if (typeof color == "object" && color != null && Object.getOwnPropertyNames(color).includes("hue")) {
+            hex = this.HSLtoHEX(color);
+        } else if (typeof color == "string") {
+            hex = color.replace("#","");
+        } else {
+            throw "ColorPicker.updateHexInput: ''color'' must be an HSL color object or a hex string";
+        }
+
+        this.hexInput.value = hex;
+    }
+
     updateColorsEditor(position) {
+        if (position === null) {
+            console.log("Unable to update color editor: no value given");
+            this.ce.indicator.style.display = "none";
+            return;
+        }
+        this.ce.indicator.style.display = "revert";
+
         // clamp position
         position = {x: this.clamp(position.x,0,this.ce.canvas.width-1), y: this.clamp(position.y,0,this.ce.canvas.height-1)};
 
@@ -110,32 +148,49 @@ export default class ColorPicker {
         this.ce.indicator.style.top  = this.ce.indicatorPos.y + 'px';
 
         // update color on various elements
+        let h = this.editorColor.hue;
+        let s = this.editorColor.saturation;
+        let l = parseFloat(this.editorColor.lightness);
+        let shadowAlpha = '0.3';
+        let shadowColor = `hsl(${h} ${s}% ${l}% / ${shadowAlpha})`;
+        let lightnessAdditive = this.editorColor.hue>=220 && this.editorColor.hue<=260 ? 30 : 25;
+        let lighterColor = `hsl(${h} ${s}% ${this.clamp(l + lightnessAdditive * (Math.pow(100-l,3)/Math.pow(50,3)),0,100)}%)`;
+        // console.log(`editorColor: ${this.editorColor.str}`);
+        // console.log(`lighterColor: ${lighterColor}`);
         this.ce.canvasContainer.style.borderColor = this.editorColor.str;
         this.ce.indicator.style.backgroundColor = this.editorColor.str;
-        let shadowAlpha = '0.3';
-        let shadowColor = `hsl(${this.editorColor.hue} ${this.editorColor.saturation}% ${this.editorColor.lightness}% / ${shadowAlpha}`;
         this.ce.canvasContainer.style.boxShadow = `0 0 .3em .05em ${shadowColor}`;
+
+        // update color on various other elements (not strictly part of the color editor)
+        this.hexInput.style.borderColor = this.editorColor.str;
+        this.saveBtn.style.borderColor = this.editorColor.str;
+        this.saveBtn.style.color = lighterColor;
 
         // update the brightness editor as well (its background changes to match the selected color)
         this.updateBrightnessEditor();
+
+        this.updateHexInput(this.editorColor);
     }
 
+    // if position (of indicator) is passed, find brightness from position, and update both;
+    // if brightness is passed, find position (of indicator) from brightness, and update both;
+    // if neither is passed, just update the color gradient background to match this.editorColor
     updateBrightnessEditor({position,brightness}={}) {
         // console.log('updateBrightnessEditor()...');
 
         // depending on whether position or brightness was passed to us,
         // derive the other
-        if (position) {
+        if (Number.isFinite(position)) {
             // console.log("...by position");
             position = this.clamp(position,0,this.be.canvas.height-1);
             brightness = (1 - position / (this.be.canvas.height - 1)) * 100;
-        } else if (brightness) {
+        } else if (Number.isFinite(brightness)) {
             // console.log("...by brightness");
             position = (100 - brightness) / 100 * (this.be.canvas.height - 1);
         }
 
         // store values if either one was given
-        if (position || brightness) {
+        if (Number.isFinite(position) || Number.isFinite(brightness)) {
             this.be.indicatorPos = position;
             this.be.editorBrightness = brightness;
         }
@@ -146,10 +201,10 @@ export default class ColorPicker {
         // draw gradient bg if color has changed
         if (this.editorColor.str != this.be.colorStr) {
             // console.log(`...updating bg (this.editorColor.str == ${this.editorColor.str}, this.be.colorStr == ${this.be.colorStr})`);
-            
+
             this.be.colorStr = this.editorColor.str;
             const grd = this.be.ctx.createLinearGradient(0, 0, 0, this.be.canvas.height);
-            grd.addColorStop(0, this.be.colorStr);
+            grd.addColorStop(0, this.be.colorStr || "white");
             grd.addColorStop(1, "black");
             this.be.ctx.fillStyle = grd;
             this.be.ctx.fillRect(0, 0, this.be.canvas.width, this.be.canvas.height);
@@ -180,8 +235,12 @@ export default class ColorPicker {
 
     // color param should be an object of form {hue:[number], saturation:[number], lightness:[number]} (with opt 'str' property)
     getPositionFromColor(hsl) {
-        let h = hsl.hue % 360;
-        let l = this.clamp(hsl.lightness,50,100); //Math.abs(hsl.lightness - 50) + 50;
+        try {
+            var h = hsl.hue % 360;
+            var l = this.clamp(hsl.lightness,50,100); //Math.abs(hsl.lightness - 50) + 50;
+        } catch(e) {
+            return null;
+        }
 
         let x = h / 360 * (this.ce.canvas.width-1);
         let y = (1 - (l - 50) / 100 * 2) * (this.ce.canvas.height-1);
@@ -193,6 +252,9 @@ export default class ColorPicker {
     }
 
     HEXtoRGB(hex) {
+        if (typeof hex != "string")
+            return null;
+
         hex = hex.replace('#','');
         let red = parseInt(hex.substring(0,2),16);
         let green = parseInt(hex.substring(2,4),16);
@@ -210,9 +272,14 @@ export default class ColorPicker {
     RGBtoHSL(rgb) {
         // borrowed (and modified) from https://www.w3schools.com/lib/w3color.js
         /* w3color.js ver.1.18 by w3schools.com (Do not remove this line) */
-        let r = rgb.red;
-        let g = rgb.green;
-        let b = rgb.blue;
+
+        try {
+            var r = rgb.red;
+            var g = rgb.green;
+            var b = rgb.blue;
+        } catch(e) {
+            return null;
+        }
 
         var min, max, i, l, s, maxcolor, h, rgb = [];
         rgb[0] = r / 255;
@@ -256,6 +323,10 @@ export default class ColorPicker {
             lightness: l,
             str: `hsl(${h} ${s}% ${l}%)`
         };
+    }
+
+    HSLtoHEX(hsl) {
+        return "000000";
     }
 
     clamp(num, min, max) {

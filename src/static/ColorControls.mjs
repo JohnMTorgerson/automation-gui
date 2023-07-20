@@ -14,7 +14,7 @@ export default class ColorControls extends Controls {
 
         this.colorPicker = new ColorPicker(this);
 
-        this.firstUpdate = true;
+        // this.firstUpdate = true;
     }
 
   // get json data from home-automation;
@@ -22,11 +22,15 @@ export default class ColorControls extends Controls {
   updateCtrls(data) {
     super.updateCtrls(data);
 
-    // only fill the input field on the first update so as not to interrupt any user input
-    if (this.firstUpdate) {
-        this.inputEl.value = this.data.settings.color;
-        this.firstUpdate = false;
+    if (data) {
+        this.colorPicker.updateSettings(data.settings);
     }
+
+    // // only fill the input field on the first update so as not to interrupt any user input
+    // if (this.firstUpdate) {
+    //     this.inputEl.value = this.data.settings.color;
+    //     this.firstUpdate = false;
+    // }
 
     // // update threshold values for temp and humidity
     // document.querySelector("#temp_controls .current_setting").innerHTML = this.data.settings.temp_target;
@@ -58,7 +62,7 @@ export default class ColorControls extends Controls {
     super.setEvents();
 
     // control buttons
-    document.querySelector("#cp_form button").addEventListener("click", (e) => {
+    document.querySelector("#cp_save_btn").addEventListener("click", (e) => {
         console.log(`clicked on input, value is: ${this.inputEl.value}`);
         this.btnClick(e,'color',this.inputEl.value);
     });
@@ -67,5 +71,14 @@ export default class ColorControls extends Controls {
     // document.querySelector("#temp_controls .button.down").addEventListener("click", (e) => {this.btnClick(e,'temp_target',-1);});
     // document.querySelector("#hum_controls .button.up").addEventListener("click", (e) => {this.btnClick(e,'rel_hum_max',1);});
     // document.querySelector("#hum_controls .button.down").addEventListener("click", (e) => {this.btnClick(e,'rel_hum_max',-1);});
+  }
+
+  showControls(e) {
+    // whenever the controls window is opened from being hidden, reset the ColorPicker's values to those in the settings
+    if (!this.showing) {
+        this.colorPicker.initializeValuesFromSettings();
+    }
+
+    super.showControls(e);
   }
 }

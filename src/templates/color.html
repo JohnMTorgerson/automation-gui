@@ -23,17 +23,17 @@
     <div id="color_picker_container">
         <div id="cp_color_editor_container">
             <div id="cp_colors_canvas_container" class="button">
-                <canvas id="cp_colors_canvas" width="650" height="150"></canvas>
+                <canvas id="cp_colors_canvas" width="650" height="250"></canvas>
                 <div id="cp_colors_indicator"></div>
             </div>
             <div id="cp_brightness_canvas_container" class="button">
-                <canvas id="cp_brightness_canvas" width="50" height="150"></canvas>
+                <canvas id="cp_brightness_canvas" width="50" height="250"></canvas>
                 <div id="cp_brightness_indicator"></div>
             </div>
         </div>
         <div id="cp_form" class="controls">
-            <input type="text"/>
-            <button class="button">Enter</button>
+            <input id="cp_hex_input" type="text" class="button" />
+            <button id="cp_save_btn" class="button">Save</button>
         </div>    
     </div>
     <!-- <div id="brightness_controls" class="controls">
