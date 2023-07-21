@@ -115,7 +115,7 @@ export default class ColorPicker {
     }
 
     updateHexInput(color) {
-        console.log(`color: ${JSON.stringify(color)}`);
+        // console.log(`color: ${JSON.stringify(color)}`);
         let hex;
         if (typeof color == "object" && color != null && Object.getOwnPropertyNames(color).includes("hue")) {
             hex = this.HSLtoHEX(color);
@@ -225,12 +225,7 @@ export default class ColorPicker {
         let h = (position.x / width * 360).toFixed(3); // hue
         let s = 100;
         let l = ((1 - position.y / height) / 2 * 100 + 50).toFixed(3); // lightness
-        return {
-            hue: h,
-            saturation: s,
-            lightness: l,
-            str: `hsl(${h} ${s}% ${l}%)`
-        };
+        return this.HSL_obj(h,s,l);
     }
 
     // color param should be an object of form {hue:[number], saturation:[number], lightness:[number]} (with opt 'str' property)
@@ -245,6 +240,24 @@ export default class ColorPicker {
         let x = h / 360 * (this.ce.canvas.width-1);
         let y = (1 - (l - 50) / 100 * 2) * (this.ce.canvas.height-1);
         return {x:x,y:y}
+    }
+
+    RGB_obj(red,green,blue,alpha=null) {
+        return {
+            red: red,
+            green: green,
+            blue: blue,
+            str: alpha == null ? `rgb(${red},${green},${blue})` : `rgba(${red},${green},${blue},${alpha})`
+        };
+    }
+
+    HSL_obj(h,s,l) {
+        return {
+            hue: h,
+            saturation: s,
+            lightness: l,
+            str: `hsl(${h} ${s}% ${l}%)`
+        };
     }
   
     HEXtoHSL(hex) {
@@ -261,12 +274,7 @@ export default class ColorPicker {
         let blue = parseInt(hex.substring(4,6),16);
         // console.log(`\nred: ${red}\ngrn: ${green}\nblu: ${blue}`);
 
-        return {
-            red: red,
-            green: green,
-            blue: blue,
-            str: `rgb(${red},${green},${blue})`
-        };
+        return this.RGB_obj(red,green,blue);
     }
 
     RGBtoHSL(rgb) {
@@ -317,16 +325,59 @@ export default class ColorPicker {
         s = s * 100;
         l = l * 100;
 
-        return {
-            hue: h,
-            saturation: s,
-            lightness: l,
-            str: `hsl(${h} ${s}% ${l}%)`
-        };
+        return this.HSL_obj(h,s,l);
     }
 
     HSLtoHEX(hsl) {
-        return "000000";
+        // console.log(JSON.stringify(hsl));
+        return this.RGBtoHEX(this.HSLtoRGB(hsl));
+    }
+
+    RGBtoHEX(rgb) {
+        // console.log(JSON.stringify(rgb));
+
+        // convert each primary component to a hexadecimal (integer) string
+        let toHexStr = (c) => this.clamp(Math.round(parseFloat(c)),0,255).toString(16).padStart(2,'0');
+
+        let r = toHexStr(rgb.red);
+        let g = toHexStr(rgb.green);
+        let b = toHexStr(rgb.blue);
+        let hexStr = `${r}${g}${b}`;
+        // console.log(hexStr);
+        // console.log(JSON.stringify(this.HEXtoRGB(hexStr)));
+        return hexStr;
+    }
+
+    HSLtoRGB(hsl) {
+        // borrowed (and modified) from https://www.w3schools.com/lib/w3color.js
+        /* w3color.js ver.1.18 by w3schools.com (Do not remove this line) */
+
+        let hue = parseFloat(hsl.hue);
+        let sat = parseFloat(hsl.saturation) / 100;
+        let light = parseFloat(hsl.lightness) / 100;
+
+        var t1, t2, r, g, b;
+        hue = hue / 60;
+        if ( light <= 0.5 ) {
+            t2 = light * (sat + 1);
+        } else {
+            t2 = light + sat - (light * sat);
+        }
+        t1 = light * 2 - t2;
+        r = hueToRgb(t1, t2, hue + 2) * 255;
+        g = hueToRgb(t1, t2, hue) * 255;
+        b = hueToRgb(t1, t2, hue - 2) * 255;
+
+        return this.RGB_obj(r,g,b);
+        
+        function hueToRgb(t1, t2, hue) {
+            if (hue < 0) hue += 6;
+            if (hue >= 6) hue -= 6;
+            if (hue < 1) return (t2 - t1) * hue + t1;
+            else if(hue < 3) return t2;
+            else if(hue < 4) return (t2 - t1) * (4 - hue) + t1;
+            else return t1;
+        }
     }
 
     clamp(num, min, max) {

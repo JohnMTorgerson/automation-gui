@@ -11,7 +11,9 @@ export default class Controls {
         this.container = document.querySelector("#main_container");
         this.rect = this.container.getBoundingClientRect();
       }
-  
+      this.switchBtn = document.querySelector("#onoff_switch");
+
+      this.setOnOffSwitch();
       this.setElementSizes(); // set some sizes and positions of DOM elements
       this.setEvents(); // set mouse events on DOM objects
     }
@@ -21,14 +23,24 @@ export default class Controls {
     updateCtrls(data) {
       if (data) this.data = data;
     
-      // make sure the master switch reflects the on/off state
-      const switch_btn = document.querySelector("#onoff_switch");
-      if (this.data.settings.on) {
-        switch_btn.classList.add("on")
-      } else {
-        switch_btn.classList.remove("on")
+      this.setOnOffSwitch();
+    }
+
+    setOnOffSwitch() {
+      try {
+        var on = this.data.settings.on;
+        if (typeof on === undefined) return;
+      } catch(e) {
+        // no 'on' setting found, ''data'' is probably empty, so do nothing 
+        return;
       }
-  
+
+      // make sure the master switch reflects the on/off state
+      if (on) {
+        this.switchBtn.classList.add("on")
+      } else {
+        this.switchBtn.classList.remove("on")
+      }
     }
   
   
@@ -107,7 +119,7 @@ export default class Controls {
       // a click on any input element should stop propagation (so the controls don't disappear)
       // and stop the hideDelay timer altogether (it would be reset by clicking on a button)
       document.querySelectorAll("input").forEach((el) => {
-        console.log("this is an input element");
+        // console.log("this is an input element");
         el.addEventListener("click", (e) => {e.stopPropagation(); clearTimeout(this.hideDelay);});
       });
     }
