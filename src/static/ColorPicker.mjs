@@ -23,7 +23,10 @@ export default class ColorPicker {
         this.be.indicatorPos = 0;
         this.be.colorStr = "black";
 
-        this.hexInput = document.getElementById("cp_hex_input");
+        this.hexInput = document.querySelector("#cp_hex_input input");
+        this.hexInputLabel = document.querySelector("#cp_hex_input .input_label");
+        this.brtInput = document.querySelector("#cp_brt_input input");
+        this.brtInputLabel = document.querySelector("#cp_brt_input .input_label");
         this.saveBtn = document.getElementById("cp_save_btn");
 
 
@@ -58,26 +61,70 @@ export default class ColorPicker {
         this.be.canvasContainer.style.height = this.be.canvas.height + 'px';
 
 
-        // =========== set events =========== //
+        // =========== set COLOR EDITOR events =========== //
         this.ce.canvasContainer.addEventListener("mousedown", (e) => {
             e.stopPropagation();
-            this.mouseDown = true;
+            this.controller.showControls(); // to update the inactivity timeout which hides the control pane
+            this.mouseDownInCE = true;
             this.updateColorsEditor({x:e.offsetX,y:e.offsetY});
         });
+        // this.ce.canvasContainer.addEventListener("click", (e) => {
+        //     e.stopPropagation(); // so as not to close the controls pane
+        //     this.controller.showControls(); // to update the inactivity timeout which hides the control pane
+        // });
+
+        // =========== set BRIGHTNESS EDITOR events =========== //
+        this.be.canvasContainer.addEventListener("mousedown", (e) => {
+            e.stopPropagation();
+            this.controller.showControls(); // to update the inactivity timeout which hides the control pane
+            this.mouseDownInBE = true;
+            this.updateBrightnessEditor({position:e.offsetY});
+        });
+        // this.be.canvasContainer.addEventListener("click", (e) => {
+        //     e.stopPropagation(); // so as not to close the controls pane
+        //     this.controller.showControls(); // to update the inactivity timeout which hides the control pane
+        // });
+
+        // =========== events for BOTH =========== //
         window.addEventListener("mouseup", (e) => {
             e.stopPropagation();
-            this.mouseDown = false;
+            document.body.style.cursor = "default";
+            this.mouseDownInCE = false;
+            this.mouseDownInBE = false;
+
+            // dispatch a synthetic mouse move event to start the cursor timeout
+            let fakeMouseMove = new MouseEvent("mousemove", {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+            });
+            window.dispatchEvent(fakeMouseMove);
         });
-        let rect = this.ce.canvas.getBoundingClientRect();
-        window.addEventListener("mousemove", (e) => {
-            if (this.mouseDown) {
-                this.updateColorsEditor({x:e.pageX-rect.x,y:e.pageY-rect.y});
+        let CErect = this.ce.canvas.getBoundingClientRect();
+        let BErect = this.be.canvas.getBoundingClientRect();
+        document.body.addEventListener("mousemove", (e) => {
+            if (this.controller.showing) {
+                // if mouse is down, and was initially pressed on either color editor or brightness editor
+                if (this.mouseDownInCE || this.mouseDownInBE) {
+                    e.stopPropagation(); // to keep mouse from appearing upon movement
+                    document.body.style.cursor = "none"; // disappear mouse
+                    this.controller.showControls(); // to update the inactivity timeout which hides the control pane
+
+                    if (this.mouseDownInCE) {
+                        this.updateColorsEditor({x:e.pageX-CErect.x,y:e.pageY-CErect.y});
+                    }
+                    if (this.mouseDownInBE) {
+                        this.updateBrightnessEditor({position:e.pageY-BErect.y});
+                    }
+    
+                } else {
+                    // the mouse is not down or was not initially pressed on either color editor or brightness editor
+                    // so movement should allow the cursor to appear
+                    // document.body.style.cursor = "default"; // <-- but actually this should already be taken care of, since we're not stopping propagation here
+                }
             }
         });
-        this.ce.canvasContainer.addEventListener("click", (e) => {
-            e.stopPropagation(); // so as not to close the controls pane
-            this.controller.showControls(); // to update the inactivity timeout which hides the control pane
-        });
+
 
         // =========== draw editor initial state =========== //
         this.drawColors();
@@ -128,6 +175,18 @@ export default class ColorPicker {
         this.hexInput.value = hex;
     }
 
+    updateBrtInput({color: color, brightness: brightness} = {}) {
+        // console.log(`color: ${JSON.stringify(color)}`);
+        if (color) {
+            this.brtInput.style.borderColor = color.str;
+        }
+
+        if (Number.isFinite(brightness)) {
+            this.brtInput.value = brightness;
+        }
+    }
+
+
     updateColorsEditor(position) {
         if (position === null) {
             console.log("Unable to update color editor: no value given");
@@ -165,11 +224,14 @@ export default class ColorPicker {
         this.hexInput.style.borderColor = this.editorColor.str;
         this.saveBtn.style.borderColor = this.editorColor.str;
         this.saveBtn.style.color = lighterColor;
+        this.hexInputLabel.style.color = lighterColor;
+        this.brtInputLabel.style.color = lighterColor;
 
         // update the brightness editor as well (its background changes to match the selected color)
         this.updateBrightnessEditor();
 
         this.updateHexInput(this.editorColor);
+        this.updateBrtInput({color: this.editorColor});
     }
 
     // if position (of indicator) is passed, find brightness from position, and update both;
@@ -192,11 +254,13 @@ export default class ColorPicker {
         // store values if either one was given
         if (Number.isFinite(position) || Number.isFinite(brightness)) {
             this.be.indicatorPos = position;
-            this.be.editorBrightness = brightness;
+            this.editorBrightness = Math.round(brightness);
+            this.updateBrtInput({brightness: this.editorBrightness}); // update brightness input
         }
 
         // move indicator
         this.be.indicator.style.top = this.be.indicatorPos + 'px';
+        this.be.indicator.style.backgroundColor = `hsl(0 0% ${this.be.editorBrightness*.8+10}%)`;
 
         // draw gradient bg if color has changed
         if (this.editorColor.str != this.be.colorStr) {
@@ -242,12 +306,16 @@ export default class ColorPicker {
         return {x:x,y:y}
     }
 
-    RGB_obj(red,green,blue,alpha=null) {
+    getEditorColorHexString() {
+        return this.HSLtoHEX(this.editorColor);
+    }
+
+    RGB_obj(r,g,b,a=null) {
         return {
-            red: red,
-            green: green,
-            blue: blue,
-            str: alpha == null ? `rgb(${red},${green},${blue})` : `rgba(${red},${green},${blue},${alpha})`
+            red: r,
+            green: g,
+            blue: b,
+            str: a == null ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${a})`,
         };
     }
 
@@ -256,7 +324,7 @@ export default class ColorPicker {
             hue: h,
             saturation: s,
             lightness: l,
-            str: `hsl(${h} ${s}% ${l}%)`
+            str: `hsl(${h} ${s}% ${l}%)`,
         };
     }
   

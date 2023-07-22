@@ -224,12 +224,14 @@ def color_control(obj=None):
 
             # to later check if settings have changed
             old_settings = copy.deepcopy(data["scenes"]["color"]["settings"])
+            logger.debug(f"Old settings: {json.dumps(old_settings)}")
             
             # merge update
             data["scenes"]["color"]["settings"] |= settings_update
 
             # to later check if settings have changed
             new_settings = data["scenes"]["color"]["settings"]
+            logger.debug(f"New settings: {json.dumps(new_settings)}")
 
 
             # delete file contents
@@ -278,7 +280,10 @@ def color_control(obj=None):
 
     # run the actual scene!!!
     if new_settings["on"] is True and not object_equals(new_settings,old_settings):
+        logger.debug(f"color scene is {'ON' if new_settings['on'] else 'OFF'} & new settings are {'THE SAME AS' if object_equals(new_settings,old_settings) else 'DIFFERENT THAN'} before, so running color scene...")
         home_automation.color_scene()
+    else :
+        logger.debug(f"color scene is {'ON' if new_settings['on'] else 'OFF'} & new settings are {'THE SAME AS' if object_equals(new_settings,old_settings) else 'DIFFERENT THAN'} before, so *not* running color scene...")
 
 
     return jsonify(settings)

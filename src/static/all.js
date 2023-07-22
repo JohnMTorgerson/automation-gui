@@ -5,7 +5,7 @@
   // and then set the mouse cursor to disappear after a second or two of inactivity
   let mouseTimer;
   let mouseCounter = 0;
-  document.body.addEventListener("mousemove",(e) => {
+  window.addEventListener("mousemove",(e) => {
     // we want the cursor to appear when using a mouse to press control buttons
     // on the GUI, but we don't want it to appear when using the touchscreen;
     // for now, we use a counter to make the distinction (so that the cursor only appears

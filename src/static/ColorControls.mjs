@@ -62,15 +62,13 @@ export default class ColorControls extends Controls {
     super.setEvents();
 
     // control buttons
-    document.querySelector("#cp_save_btn").addEventListener("click", (e) => {
-        console.log(`clicked on input, value is: ${this.inputEl.value}`);
-        this.btnClick(e,'color',this.inputEl.value);
+    document.querySelector("#cp_save_btn").addEventListener("mousedown", (e) => {
+        console.log(`clicked save...`);
+        this.btnClick(e,{
+            color: this.colorPicker.getEditorColorHexString(),
+            brightness: this.colorPicker.editorBrightness
+        });
     });
-
-    // document.querySelector("#temp_controls .button.up").addEventListener("click", (e) => {this.btnClick(e,'temp_target',1);});
-    // document.querySelector("#temp_controls .button.down").addEventListener("click", (e) => {this.btnClick(e,'temp_target',-1);});
-    // document.querySelector("#hum_controls .button.up").addEventListener("click", (e) => {this.btnClick(e,'rel_hum_max',1);});
-    // document.querySelector("#hum_controls .button.down").addEventListener("click", (e) => {this.btnClick(e,'rel_hum_max',-1);});
   }
 
   showControls(e) {

@@ -105,22 +105,18 @@ export default class Controls {
   
       // clicking anywhere on the controls (except buttons) hides controls
       const controls = document.getElementById("controls_container");
-      controls.addEventListener('click', (e) => {
+      controls.addEventListener('mousedown', (e) => {
         this.hideControls(e);
       });
   
       // control buttons
-    //   document.querySelector("#temp_controls .button.up").addEventListener("click", (e) => {this.btnClick(e,'temp_target',1);});
-    //   document.querySelector("#temp_controls .button.down").addEventListener("click", (e) => {this.btnClick(e,'temp_target',-1);});
-    //   document.querySelector("#hum_controls .button.up").addEventListener("click", (e) => {this.btnClick(e,'rel_hum_max',1);});
-    //   document.querySelector("#hum_controls .button.down").addEventListener("click", (e) => {this.btnClick(e,'rel_hum_max',-1);});
-      document.querySelector("#onoff_switch").addEventListener("click", (e) => {this.switchClick(e);});
+      document.querySelector("#onoff_switch .switch_outer").addEventListener("mousedown", (e) => {this.switchClick(e);});
 
       // a click on any input element should stop propagation (so the controls don't disappear)
       // and stop the hideDelay timer altogether (it would be reset by clicking on a button)
       document.querySelectorAll("input").forEach((el) => {
         // console.log("this is an input element");
-        el.addEventListener("click", (e) => {e.stopPropagation(); clearTimeout(this.hideDelay);});
+        el.addEventListener("mousedown", (e) => {e.stopPropagation(); clearTimeout(this.hideDelay);});
       });
     }
   
@@ -141,6 +137,7 @@ export default class Controls {
     }
   
     btnClick(e,prop,input) {
+      console.log(`Controls class has received a button click. Values are:\nprop==${JSON.stringify(prop)}, value==${input}`);
       e.stopPropagation(); // so that clicking it doesn't hide the controls view
   
       // we call showControls just to reset the hideDelay timer
@@ -149,17 +146,32 @@ export default class Controls {
       // reset ctrlChange object to empty
       this.ctrlChange = {};
 
-      // if the input is a number, add it to the current value
-      if (Number.isFinite(input)) {
-        console.log(`${prop} change by ${input}`);
-        this.ctrlChange[prop] = input + this.data.settings[prop];
-      } 
-      // otherwise, replace the old value with it
-      else {
-        this.ctrlChange[prop] = input;
+      // SINGLE PROPERTY CHANGE
+      if (typeof prop == "string" && typeof input != undefined) {
+        // if the input is a number, add it to the current value
+        if (Number.isFinite(input)) {
+          console.log(`Control change: ${prop} changed by ${input}`);
+          this.ctrlChange[prop] = input + this.data.settings[prop];
+        } 
+        // otherwise, replace the old value with it
+        else {
+          this.ctrlChange[prop] = input;
+        }
+
+        console.log(`Control change: new ${prop} == ${this.ctrlChange[prop]}`);
+      }
+      
+      // MULTIPLE PROPERTY CHANGE
+      else if (typeof prop == "object" && prop != null && typeof input === "undefined") {
+        this.ctrlChange = prop;
+
+        console.log(`Control change: ${JSON.stringify(this.ctrlChange)}`);
       }
 
-      console.log(`New ${prop}: ${this.ctrlChange[prop]}`);
+      // console.log(`typeof prop == "object": ${typeof prop == "object"} (typeof prop: ${typeof prop})`);
+      // console.log(`prop != null: ${prop!=null}`);
+      // console.log(`typeof input === undefined: ${typeof input === "undefined"} (typeof input: ${typeof input})`);
+
       this.saveCtrlChange();
     }
   
@@ -169,17 +181,17 @@ export default class Controls {
       e.stopPropagation(); // so that clicking it doesn't hide the controls view
       this.showControls(); // we call showControls just to reset the hideDelay timer
   
-      const el = e.currentTarget;
+      // const el = e.originalTarget.parent;
       this.ctrlChange = {};
   
       if (this.data.settings.on) {
         // scene is on, so we want to turn it off
         this.ctrlChange["on"] = false;
-        el.classList.remove("on");
+        this.switchBtn.classList.remove("on");
       } else {
         // scene is off, so we want to turn it on
         this.ctrlChange["on"] = true;
-        el.classList.add("on");
+        this.switchBtn.classList.add("on");
       }
   
       this.saveCtrlChange();
