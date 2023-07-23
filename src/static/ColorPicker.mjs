@@ -88,17 +88,17 @@ export default class ColorPicker {
         // =========== events for BOTH =========== //
         window.addEventListener("mouseup", (e) => {
             e.stopPropagation();
-            document.body.style.cursor = "default";
+            // document.body.style.cursor = "default";
             this.mouseDownInCE = false;
             this.mouseDownInBE = false;
 
-            // dispatch a synthetic mouse move event to start the cursor timeout
-            let fakeMouseMove = new MouseEvent("mousemove", {
-                view: window,
-                bubbles: true,
-                cancelable: true,
-            });
-            window.dispatchEvent(fakeMouseMove);
+            // // dispatch a synthetic mouse move event to start the cursor timeout
+            // let fakeMouseMove = new MouseEvent("mousemove", {
+            //     view: window,
+            //     bubbles: true,
+            //     cancelable: true,
+            // });
+            // window.dispatchEvent(fakeMouseMove);
         });
         let CErect = this.ce.canvas.getBoundingClientRect();
         let BErect = this.be.canvas.getBoundingClientRect();

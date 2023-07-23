@@ -86,7 +86,7 @@ def sunlight_update():
 
 # relay control changes back to the automation controller
 @app.route('/sunlight_control', methods=['POST'])
-def sunlight_control(obj=None):
+async def sunlight_control(obj=None):
     logger.debug("#######################sunlight_control######################")
     logger.debug("receiving sunlight control change from UI, writing to file...")
 
@@ -163,7 +163,7 @@ def sunlight_control(obj=None):
 
     # run the actual scene!!!
     if new_on is True:
-        home_automation.sunlight_scene()
+        await home_automation.sunlight_scene()
 
 
 

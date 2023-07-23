@@ -57,6 +57,7 @@ import ColorControls from './ColorControls.mjs';
 
         let container = document.getElementById("main_container");
         container.style.backgroundColor = `#${data.settings.color}`;
+        document.querySelector("#main_container .text").innerHTML = `(${data.settings.on ? "on" : "off"})`;
     };
 
     // =========================================== //
