@@ -2,16 +2,15 @@ import ThermControls from './ThermControls.mjs';
 
 (function main() {
 
-  setElementSizes();
   const thermCtrls = new ThermControls();
 
+  // =================== set some styling variables =================== //
 
   const backgroundColor = (a) => `rgba(0,0,0,${isNaN(a) ? '1' : a})`;
   const mainColor = (a) => `rgba(50,255,50,${isNaN(a) ? '1' : a})`; // green
   const secondaryColor = (a) => `rgba(255,50,200,${isNaN(a) ? '.9' : a})`; // magenta
   const tertiaryColor = (a) => `rgba(255,220,50,${isNaN(a) ? '1' : a})`; // yellow
   const quaternaryColor = (a) => `rgba(200,50,255,${isNaN(a) ? '1' : a})`; // purple
-
   const blueColorAC = (a) => `rgba(100,100,255,${isNaN(a) ? '.45' : a})`;
 
   // let numberFont = "Open24";//"Twobit";//"Orbitron";
@@ -24,8 +23,37 @@ import ThermControls from './ThermControls.mjs';
   // const font4 = "DeadCRT";
   const font5 = "WarGames";
 
+  const labelStyles = {
+    "font" : font2,
+    "fontSize" : fontSize * 1.5,
+    "color" : mainColor,
+    "tickWidth" : fontSize / 6,
+    "tickLength" : fontSize / 3
+  }
+  let humStyles = {...labelStyles};
+  humStyles.color = secondaryColor;
+  humStyles.font = font3;
+  humStyles.fontSize = humStyles.fontSize * 1.1; // adjust since we're using a different font
+  const currentValueStyles = {
+    "font" : font,
+    "fontSize" : fontSize * 2.5,
+    "tempColor" : labelStyles.color,
+    "humColor" : humStyles.color
+  }
+  const weatherStyles = {
+    "font" : font2,
+    "fontSize" : fontSize * 2.5,
+    "tempColor" : mainColor,
+    "humColor" : secondaryColor
+  }
+  
+  // set sizes
+  setElementSizes();
+
   // // draw overlay, a semi-transparent graphic that lies atop the rest of the screen
   // drawOverlay();
+
+
 
   //=================================================//
 
@@ -96,6 +124,14 @@ import ThermControls from './ThermControls.mjs';
     const timeLabels = document.getElementById("time_labels");
     timeLabels.width = graphWidth;
     timeLabels.height = height - graphHeight;
+
+    const currentValues = document.getElementById("current_values");
+    currentValues.style.width = graphWidth - labelStyles.tickWidth*2 + 'px';
+    currentValues.style.height = graphHeight - labelStyles.tickWidth*2 + 'px';
+    currentValues.style.left = tempLabels.width + labelStyles.tickWidth + 'px';
+    currentValues.style.top = labelStyles.tickWidth + 'px';
+    // currentValues.style.borderWidth = labelStyles.tickWidth + 'px';
+    // currentValues.style.borderColor = 'transparent';//mainColor();
   }
 
   // async function updateData(data) {
@@ -149,12 +185,16 @@ import ThermControls from './ThermControls.mjs';
     // then expand again as needed based on weather data
     // if we're showing the weather data on the graph
     if (data.settings.show_weather_graph) {
-      tempRange = findValuesRangeInTimeRange(data.logged_weather, "Temperature (degrees F)", startTime);
-      minTemp = Math.min(minTemp, Math.floor(tempRange.min-1));
-      maxTemp = Math.max(maxTemp, Math.ceil(tempRange.max+2));
-      humRange = findValuesRangeInTimeRange(data.logged_weather, "Relative Humidity (%)", startTime);
-      minHum = Math.min(minHum, Math.floor(humRange.min-1));
-      maxHum = Math.max(maxHum, Math.ceil(humRange.max+2));
+      if (data.settings.show_weather_temp) {
+        tempRange = findValuesRangeInTimeRange(data.logged_weather, "Temperature (degrees F)", startTime);
+        minTemp = Math.min(minTemp, Math.floor(tempRange.min-1));
+        maxTemp = Math.max(maxTemp, Math.ceil(tempRange.max+2));
+      }
+      if (data.settings.show_weather_hum) {
+        humRange = findValuesRangeInTimeRange(data.logged_weather, "Relative Humidity (%)", startTime);
+        minHum = Math.min(minHum, Math.floor(humRange.min-1));
+        maxHum = Math.max(maxHum, Math.ceil(humRange.max+2));
+      }
     }
 
     // set defaults in case there is no data at all
@@ -167,34 +207,6 @@ import ThermControls from './ThermControls.mjs';
     tempRange = maxTemp - minTemp;
     humRange = maxHum - minHum;
 
-
-    // label styles
-    const labelStyles = {
-      "font" : font2,
-      "fontSize" : fontSize * 1.5,
-      "color" : mainColor,
-      "tickWidth" : fontSize / 6,
-      "tickLength" : fontSize / 3
-    }
-
-    let humStyles = {...labelStyles};
-    humStyles.color = secondaryColor;
-    humStyles.font = font3;
-    humStyles.fontSize = humStyles.fontSize * 1.1; // adjust since we're using a different font
-
-    const currentValueStyles = {
-      "font" : font,
-      "fontSize" : fontSize * 2.5,
-      "tempColor" : labelStyles.color,
-      "humColor" : humStyles.color
-    }
-
-    const weatherStyles = {
-      "font" : font2,
-      "fontSize" : fontSize * 2.5,
-      "tempColor" : mainColor(.4),
-      "humColor" : secondaryColor(.4)
-    }
 
     // ====== DRAW GRAPH ====== //
 
@@ -218,7 +230,7 @@ import ThermControls from './ThermControls.mjs';
 
     // only show weather data if the setting is set to true
     if (data.settings.show_weather_graph) {
-      drawWeatherData(graphCtx,data.logged_weather,startTime,timeRange,minTemp,maxTemp,minHum,maxHum)
+      drawWeatherData(graphCtx,data.settings,data.logged_weather,startTime,timeRange,minTemp,maxTemp,minHum,maxHum)
     }
 
     // draw sensor data
@@ -264,10 +276,11 @@ import ThermControls from './ThermControls.mjs';
     drawTimeLabels(timeCtx,startTime,now,labelStyles);
 
     // ====== DRAW CURRENT VALUE LABELS ====== //
-    drawCurrentValues(graphCtx,data.current,currentValueStyles);
+    // drawCurrentValues(graphCtx,data.current,currentValueStyles); // to draw them on the canvas
+    updateCurrentValues(data.current); // new approach: using an HTML element on top of the canvas
 
     if (data.settings.show_weather_values) {
-      drawWeatherValues(graphCtx,data.logged_weather,weatherStyles,currentValueStyles.fontSize);
+      drawWeatherValues(graphCtx,data.settings,data.logged_weather,weatherStyles,currentValueStyles.fontSize);
     }
   }
 
@@ -326,12 +339,12 @@ import ThermControls from './ThermControls.mjs';
     ctx.fill();
   }
 
-  function drawDataPoint(ctx,x,y) {
-    ctx.beginPath();
-    ctx.arc(x, y, 2, 0, 2 * Math.PI, false); // background glow
-    ctx.fillStyle = "rgba(0,0,0,1)";
-    ctx.fill();
-  }
+  // function drawDataPoint(ctx,x,y) {
+  //   ctx.beginPath();
+  //   ctx.arc(x, y, 2, 0, 2 * Math.PI, false); // background glow
+  //   ctx.fillStyle = "rgba(0,0,0,1)";
+  //   ctx.fill();
+  // }
 
   // draw temp labels (y axis)
   function drawTempLabels(ctx, canvas, minTemp, maxTemp, styles) {
@@ -576,15 +589,15 @@ import ThermControls from './ThermControls.mjs';
 
   }
 
-  function drawWeatherData(ctx, weatherData, startTime, timeRange, minTemp, maxTemp, minHum, maxHum) {
+  function drawWeatherData(ctx, settings, weatherData, startTime, timeRange, minTemp, maxTemp, minHum, maxHum) {
     // console.log("drawSensorData...");
     const lineWidth = fontSize/4;
     ctx.setLineDash([0,lineWidth*2]);
     ctx.lineCap = "round";
     ctx.lineWidth = lineWidth;
 
-    const tempColor = mainColor(.8);
-    const humColor = secondaryColor(.8);
+    const tempColor = mainColor(.5);
+    const humColor = secondaryColor(.55);
 
     const tempRange = maxTemp - minTemp;
     const humRange = maxHum - minHum;
@@ -606,27 +619,31 @@ import ThermControls from './ThermControls.mjs';
           // console.log(`x:${x}, tempY:${temp}, humY:${hum}`);
 
           // draw hum
-          ctx.strokeStyle = humColor;
-          ctx.beginPath();
-          if (xLast && !isNaN(humLast)) {
-            ctx.moveTo(xLast,humLast);
+          if (settings.show_weather_hum) {
+            ctx.strokeStyle = humColor;
+            ctx.beginPath();
+            if (xLast && !isNaN(humLast)) {
+              ctx.moveTo(xLast,humLast);
+            }
+            // drawDataPoint(ctx,x,y);
+            ctx.lineTo(x, hum);
+            ctx.stroke();
+            humLast = hum;
           }
-          // drawDataPoint(ctx,x,y);
-          ctx.lineTo(x, hum);
-          ctx.stroke();
-          humLast = hum;
 
 
           // draw temp
-          ctx.strokeStyle = tempColor;
-          ctx.beginPath();
-          if (xLast && !isNaN(tempLast)) {
-            ctx.moveTo(xLast,tempLast);
+          if (settings.show_weather_temp) {
+            ctx.strokeStyle = tempColor;
+            ctx.beginPath();
+            if (xLast && !isNaN(tempLast)) {
+              ctx.moveTo(xLast,tempLast);
+            }
+            // drawDataPoint(ctx,x,y);
+            ctx.lineTo(x, temp);
+            ctx.stroke();
+            tempLast = temp;
           }
-          // drawDataPoint(ctx,x,y);
-          ctx.lineTo(x, temp);
-          ctx.stroke();
-          tempLast = temp;
 
           xLast = x;
 
@@ -719,9 +736,17 @@ import ThermControls from './ThermControls.mjs';
     ctx.shadowColor = 'transparent';
   }
 
+  function updateCurrentValues(currentValues) {
+    document.querySelector("#current_values .indoor .temp.mainunits").innerHTML = currentValues.temp_f + "°";
+    document.querySelector("#current_values .indoor .temp.altunits").innerHTML = currentValues.temp_c + "°";
+    document.querySelector("#current_values .indoor .hum").innerHTML = currentValues.rel_hum + "%";
+  }
 
-  function drawWeatherValues(ctx,weatherData,styles,currentValuesFontSize) {
-    console.log(`w${currentValuesFontSize}`);
+
+  function drawWeatherValues(ctx,settings,weatherData,styles,currentValuesFontSize) {
+    // 
+    // background: linear-gradient(to top, #3204fdba, #9907facc), url(https://picsum.photos/1280/853/?random=1) no-repeat top center;
+    // console.log(`w${currentValuesFontSize}`);
     // first, find the most recent values
 
     const timestamp = Object.keys(weatherData).sort((a,b)=>parseInt(a)<parseInt(b)?1:parseInt(a)>parseInt(b)?-1:0)[0];
@@ -737,26 +762,34 @@ import ThermControls from './ThermControls.mjs';
     ctx.font = `${styles.fontSize}px ${styles.font}`;
 
     ctx.shadowColor = backgroundColor(1);
-    ctx.shadowBlur = styles.fontSize / 2;
+    ctx.shadowBlur = styles.fontSize / 3;
 
-    for (let i=0; i<3; i++) { // just to make the shadows darker
-      let y = styles.fontSize * .15;
-      let x = currentValuesFontSize * 2.8;
+    const numLayers = 3;
+    const alpha = 1;//0.9 / numLayers;
+    for (let i=0; i<numLayers; i++) { // just to make the shadows darker
+      // let y = styles.fontSize * .15;
+      let y = graphHeight - styles.fontSize;
+      // let x = currentValuesFontSize * 2.8;
+      let x = 10;
 
-      ctx.textAlign = "left";
-      ctx.font = `${styles.fontSize}px ${styles.font}`;
-      ctx.fillStyle = styles.tempColor;
-      ctx.fillText(temp/* + "°"*/, x, y);
+      if (settings.show_weather_temp) {
+        ctx.textAlign = "left";
+        ctx.font = `${styles.fontSize}px ${styles.font}`;
+        ctx.fillStyle = styles.tempColor(alpha);
+        ctx.fillText(`${temp}°`, x, y);
 
-      ctx.font = `${styles.fontSize/2}px ${font5}`;
-      ctx.fillStyle = styles.tempColor;
-      ctx.fillText(`(${ago})`, x * 1.5, y * 1.8);
+        ctx.font = `${styles.fontSize/2}px ${font5}`;
+        ctx.fillStyle = styles.tempColor(alpha);
+        ctx.fillText(`(${ago})`, x + 70/**1.5*/, graphHeight - styles.fontSize/2 - 5/**1.8*/);
+      }
 
-      x = graphWidth - x * 1.02;
-      ctx.textAlign = "right";
-      ctx.font = `${styles.fontSize}px ${styles.font}`;
-      ctx.fillStyle = styles.humColor;
-      ctx.fillText(hum/* + "%"*/, x, y);
+      if (settings.show_weather_hum) {
+        x = graphWidth - x;// * 1.02;
+        ctx.textAlign = "right";
+        ctx.font = `${styles.fontSize}px ${styles.font}`;
+        ctx.fillStyle = styles.humColor(alpha);
+        ctx.fillText(`${hum}%`, x, y);
+      }
 
     }
 

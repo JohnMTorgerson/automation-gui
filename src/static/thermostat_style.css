@@ -3,6 +3,10 @@ body {
   background-color: black;
   cursor: none;
   user-select: none;
+  --maincolor: rgba(50,255,50,1);
+  --maincolor_faded: rgba(50,255,50,.5);
+  --secondarycolor: rgba(255,50,200,1);
+  --secondarycolor_faded: rgba(255,50,200,.5);
 }
 
 #root {
@@ -43,6 +47,76 @@ canvas {
   top:0;
 }
 
+/* ========= CURRENT VALUES ========== */
+
+#current_values {
+  position: absolute;
+  /* border-style: solid; */
+  overflow:hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+
+  text-shadow:0 0 40px black,
+              0 0 40px black,
+              0 0 40px black,
+              0 0 25px black,
+              0 0 25px black,
+              0 0 25px black;
+              /* 0 0 15px black; */
+}
+
+/* #current_values > div {
+  height: 100px;
+  background-color: #ff000055;
+} */
+
+#current_values .indoor {
+  --fontSize: calc(var(--mainfontsize) * 2.5);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  /* gap: 10px 0; */
+  font-family: 'AdvancedDot';
+  font-size: var(--fontSize);
+}
+
+#current_values .indoor > div {
+  --margin: 10px;
+  box-sizing: border-box;
+  padding-top: .3em;
+  margin: var(--margin);
+}
+
+#current_values .indoor .temp {
+  color: var(--maincolor);
+}
+
+#current_values .indoor .hum {
+  --hummargin: 0px;
+  margin-left: var(--hummargin);
+  margin-right: var(--hummargin);
+  color: var(--secondarycolor);
+  width: calc(50% - var(--hummargin) * 2);
+  text-align: right;
+}
+
+#current_values .indoor .temp.mainunits {
+  width: calc(50% - var(--margin) * 2);
+  text-align: left;
+}
+
+#current_values .indoor .temp.altunits {
+  width:50%;
+  text-align: left;
+  font-size: calc(var(--fontSize) * .7);
+  margin-top: -.4em;
+}
+
+
+
 /* ========= CONTROL SCREEN ========== */
 
 #controls_container {
@@ -51,8 +125,8 @@ canvas {
 
 #temp_controls,
 #temp_controls .button {
-  --color: rgba(50,255,50,1);
-  --color_faded: rgba(50,255,50,.5);
+  --color:var(--maincolor);
+  --color_faded: var(--maincolor_faded);
   --opacity_factor: .7;
   --opacity_factor_less: .9;
 }
@@ -62,8 +136,8 @@ canvas {
 
 #hum_controls,
 #hum_controls .button {
-  --color: rgba(255,50,200,1);
-  --color_faded: rgba(255,50,200,.5);
+  --color: var(--secondarycolor);
+  --color_faded: var(--secondarycolor_faded);
   --opacity_factor: 1;
   --opacity_factor_less: 1;
 }
@@ -71,8 +145,73 @@ canvas {
   width: 50%;
 }
 
+.weather_checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  width: 100%;
+  order: 2; /* to appear below the buttons and threshold values */
+  color: var(--color);
+  font-size: 1em;
+  font-family: 'Twobit';
+  text-transform: uppercase;
+  gap: 0.2em;
+  margin-right: 0.2em;
+  margin-left: 0.2em;
+}
+#hum_controls .weather_checkbox {
+  justify-content: right;
+}
+
+input {
+  appearance: none;
+  position: relative;
+  font-size: 1em;
+  padding: 0.5em !important;
+  background-color: rgba(0,0,0,.5);
+  border-radius: 0.35em !important;
+}
+
+input:checked::after {
+  --margin: 0.1em;
+  content: '';
+  /* content: '\2713'; */
+  /* font-family: Helvetica, sans-serif;
+  font-weight: bold; */
+  display: block;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  background-color: var(--color);
+  width: calc(100% - 2 * var(--margin));
+  height: calc(100% - 2 * var(--margin));
+  margin: var(--margin);
+  border-radius: 0.17em;
+}
+
 #temp_controls .current {
   order:1; /* to appear on the inside/right of the buttons, for symmetry */
+}
+
+#show_weather_controls {
+  --color: rgba(100,100,255,1);
+  --color_faded: rgba(100,100,255,0.5);
+  color: var(--color);
+  display: none;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 0.2em;
+}
+
+#show_weather_controls .button {
+  --color: rgba(100,100,255,1);
+  --color_faded: rgba(100,100,255,0.7);
+}
+
+#show_weather_controls label {
+  font-family: 'WarGames';
+  font-size: var(--mainfontsize);
+  color:
 }
 
 /* .current_setting {
@@ -112,7 +251,7 @@ canvas {
 } */
 
 #onoff_switch {
-  --color: rgba(50,255,50,1);
-  --color_faded: rgba(50,255,50,.5);
-  --bg_color_on: rgba(255,50,200,.5);
+  --color: var(--maincolor);
+  --color_faded: var(--maincolor_faded);
+  --bg_color_on: var(--secondarycolor_faded);
 }

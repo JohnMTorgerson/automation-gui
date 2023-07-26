@@ -48,8 +48,12 @@ export default class Controls {
       // a flag to show that a change was made
       this.changed = true;
       
+      console.log(`this.ctrlChange == ${JSON.stringify(this.ctrlChange)}`);
+
       // combine settings change with existing settings
       this.data["settings"] = {...this.data["settings"],...this.ctrlChange}
+
+      console.log(`New this.data.settings == ${JSON.stringify(this.data.settings)}`);
   
       // update the controls GUI now instead of waiting for the delay (below)
       this.updateCtrls();
@@ -158,7 +162,7 @@ export default class Controls {
           this.ctrlChange[prop] = input;
         }
 
-        console.log(`Control change: new ${prop} == ${this.ctrlChange[prop]}`);
+        console.log(`Control change: ${prop} == ${this.ctrlChange[prop]}`);
       }
       
       // MULTIPLE PROPERTY CHANGE

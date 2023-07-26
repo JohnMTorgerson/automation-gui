@@ -8,10 +8,17 @@
   <script type="text/javascript">
     const width = {{width}};
     const height = {{height}};
-    const fontSize = height / 20;
-    const graphWidth = width - (6*fontSize);//width/height * graphHeight;
-    const graphHeight = height - (3*fontSize);
+    const fontSize = {{fontSize}};
+    const graphWidth = {{graphWidth}};//width/height * graphHeight;
+    const graphHeight = {{graphHeight}};
   </script>
+  <style>
+    body {
+      --mainfontsize: {{fontSize}}px;
+      --graphWidth: {{graphWidth}}px;
+      --graphHeight: {{graphHeight}}px;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
@@ -20,6 +27,20 @@
       <canvas id="graph" class="main_canvas"></canvas>
       <canvas id="hum_labels"></canvas>
       <canvas id="time_labels"></canvas>
+      <div id="current_values">
+        <div class="indoor">
+          <div class="temp mainunits"></div>
+          <div class="hum"></div>
+          <div class="temp altunits"></div>
+        </div>
+        <div class="outdoor">
+          <div class="temp">
+            <div class="temp"></div>
+            <div class="time_since_current"></div>
+          </div>
+          <div class="hum"></div>
+        </div>
+      </div>
     </div>
     <canvas id="overlay"></canvas>
     <div id="controls_container">
@@ -38,6 +59,10 @@
           <div class="button up"></div>
           <div class="button down"></div>
         </div>
+        <div class="weather_checkbox">
+          <input type="checkbox" id="show_weather_temp" name="show_weather_temp" value="false" class="checkbox button" />
+          <label for="show_weather_temp">Weather</label>
+        </div>
       </div>
       <div id="hum_controls" class="controls">
         <div class="label">humid</div>
@@ -45,10 +70,20 @@
           <div class="current_setting"></div>
           <div class="units">pct</div>
         </div>
+        <div class="weather_checkbox">
+          <label for="show_weather_hum">Weather</label>
+          <input type="checkbox" id="show_weather_hum" name="show_weather_hum" value="false" class="checkbox button" />
+        </div>
         <div class="button_container">
           <div class="button up"></div>
           <div class="button down"></div>
         </div>
+      </div>
+      <div id="show_weather_controls">
+        <input type="checkbox" id="show_weather_graph" name="show_weather_graph" value="false" class="checkbox button" />
+          <label for="show_weather_graph">Weather&nbsp;Graph</label>
+        <input type="checkbox" id="show_weather_values" name="show_weather_values" value="false" class="checkbox button" />
+          <label for="show_weather_values">Weather&nbsp;Values</label>
       </div>
     </div>
 {% endblock %}

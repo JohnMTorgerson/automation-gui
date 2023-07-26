@@ -86,7 +86,7 @@ def sunlight_update():
 
 # relay control changes back to the automation controller
 @app.route('/sunlight_control', methods=['POST'])
-async def sunlight_control(obj=None):
+def sunlight_control(obj=None):
     logger.debug("#######################sunlight_control######################")
     logger.debug("receiving sunlight control change from UI, writing to file...")
 
@@ -163,7 +163,7 @@ async def sunlight_control(obj=None):
 
     # run the actual scene!!!
     if new_on is True:
-        await home_automation.sunlight_scene()
+        home_automation.sunlight_scene()
 
 
 
@@ -296,7 +296,10 @@ def color_control(obj=None):
 @app.route('/scenes/thermostat')
 def thermostat():
     logger.debug("====== Entering THERMOSTAT Scene ======")
-    return render_template('thermostat.html', name="Thermostat", width=width, height=height)
+    fontSize = height/20
+    graphWidth = width - (6*fontSize)
+    graphHeight = height - (3*fontSize)
+    return render_template('thermostat.html', name="Thermostat", width=width, height=height, fontSize=fontSize, graphWidth=graphWidth, graphHeight=graphHeight)
 
 # thermostat scene AJAX data request
 @app.route('/thermostat_update', methods=['POST','GET'])

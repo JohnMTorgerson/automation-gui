@@ -9,6 +9,13 @@ export default class ThermControls extends Controls {
     // update threshold values for temp and humidity
     document.querySelector("#temp_controls .current_setting").innerHTML = this.data.settings.temp_target;
     document.querySelector("#hum_controls .current_setting").innerHTML = this.data.settings.rel_hum_max;
+
+    console.log(`show_weather_temp: ${this.data.settings.show_weather_temp}`);
+    console.log(`show_weather_hum:  ${this.data.settings.show_weather_hum}`);
+
+    document.querySelector("#temp_controls .weather_checkbox .checkbox").checked = this.data.settings.show_weather_temp;
+    document.querySelector("#hum_controls .weather_checkbox .checkbox").checked = this.data.settings.show_weather_hum;
+
   }
 
   setElementSizes() {
@@ -40,5 +47,8 @@ export default class ThermControls extends Controls {
     document.querySelector("#temp_controls .button.down").addEventListener("mousedown", (e) => {this.btnClick(e,'temp_target',-1);});
     document.querySelector("#hum_controls .button.up").addEventListener("mousedown", (e) => {this.btnClick(e,'rel_hum_max',1);});
     document.querySelector("#hum_controls .button.down").addEventListener("mousedown", (e) => {this.btnClick(e,'rel_hum_max',-1);});
+
+    document.querySelector("#temp_controls .weather_checkbox .checkbox").addEventListener("change", (e) => {this.btnClick(e,'show_weather_temp',e.target.checked);});
+    document.querySelector("#hum_controls .weather_checkbox .checkbox").addEventListener("change", (e) => {this.btnClick(e,'show_weather_hum',e.target.checked);});
   }
 }
