@@ -2,8 +2,6 @@ import ThermControls from './ThermControls.mjs';
 
 (function main() {
 
-  const thermCtrls = new ThermControls();
-
   // =================== set some styling variables =================== //
 
   const backgroundColor = (a) => `rgba(0,0,0,${isNaN(a) ? '1' : a})`;
@@ -49,6 +47,9 @@ import ThermControls from './ThermControls.mjs';
   
   // set sizes
   setElementSizes();
+
+  // create controls pane object (must be called after setElementSizes to set itself up to fit properly)
+  const thermCtrls = new ThermControls();
 
   // // draw overlay, a semi-transparent graphic that lies atop the rest of the screen
   // drawOverlay();
@@ -279,8 +280,13 @@ import ThermControls from './ThermControls.mjs';
     // drawCurrentValues(graphCtx,data.current,currentValueStyles); // to draw them on the canvas
     updateCurrentValues(data.current); // new approach: using an HTML element on top of the canvas
 
+    const outdoorValuesEl = document.querySelector("#current_values > .outdoor");
     if (data.settings.show_weather_values) {
-      drawWeatherValues(graphCtx,data.settings,data.logged_weather,weatherStyles,currentValueStyles.fontSize);
+      // drawWeatherValues(graphCtx,data.settings,data.logged_weather,weatherStyles,currentValueStyles.fontSize);
+      updateWeatherValues(data.logged_weather,data.settings);
+      outdoorValuesEl.style.visibility = "visible";
+    } else {
+      outdoorValuesEl.style.visibility = "hidden";
     }
   }
 
@@ -745,7 +751,6 @@ import ThermControls from './ThermControls.mjs';
 
   function drawWeatherValues(ctx,settings,weatherData,styles,currentValuesFontSize) {
     // 
-    // background: linear-gradient(to top, #3204fdba, #9907facc), url(https://picsum.photos/1280/853/?random=1) no-repeat top center;
     // console.log(`w${currentValuesFontSize}`);
     // first, find the most recent values
 
@@ -794,6 +799,34 @@ import ThermControls from './ThermControls.mjs';
     }
 
     ctx.shadowColor = 'transparent';
+  }
+
+  function updateWeatherValues(weatherData,settings) {
+    const timestamp = Object.keys(weatherData).sort((a,b)=>parseInt(a)<parseInt(b)?1:parseInt(a)>parseInt(b)?-1:0)[0];
+    const temp = Math.round(parseFloat(weatherData[timestamp]["Temperature (degrees F)"]));
+    const hum = weatherData[timestamp]["Relative Humidity (%)"];
+
+    const time = new Date(parseInt(timestamp));
+    const delta = Date.now() - time;
+    let ago = timeAgoStr(delta);
+
+    const temp_value_el = document.querySelector("#current_values .outdoor > .temp");
+    const hum_value_el = document.querySelector("#current_values .outdoor > .hum");
+
+
+    if (settings.show_weather_temp) {
+      document.querySelector("#current_values .outdoor .temp .temp").innerHTML = temp + "°";
+      document.querySelector("#current_values .outdoor .temp .time_since_current").innerHTML = `(${ago})`;
+      temp_value_el.style.visibility = "visible";
+    } else {
+      temp_value_el.style.visibility = "hidden";
+    }
+    if (settings.show_weather_hum) {
+      document.querySelector("#current_values .outdoor .hum .hum").innerHTML = hum + '%';
+      hum_value_el.style.visibility = "visible";
+    } else {
+      hum_value_el.style.visibility = "hidden";
+    }
   }
 
 
