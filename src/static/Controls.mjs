@@ -45,15 +45,15 @@ export default class Controls {
   
   
     saveCtrlChange(delay) {
-      // a flag to show that a change was made
-      this.changed = true;
+      // clear any previous changes that were waiting to be made
+      clearTimeout(this.saveDelay);
       
-      console.log(`this.ctrlChange == ${JSON.stringify(this.ctrlChange)}`);
+      // console.log(`this.ctrlChange == ${JSON.stringify(this.ctrlChange)}`);
 
       // combine settings change with existing settings
       this.data["settings"] = {...this.data["settings"],...this.ctrlChange}
 
-      console.log(`New this.data.settings == ${JSON.stringify(this.data.settings)}`);
+      // console.log(`New this.data.settings == ${JSON.stringify(this.data.settings)}`);
   
       // update the controls GUI now instead of waiting for the delay (below)
       this.updateCtrls();
@@ -64,9 +64,10 @@ export default class Controls {
       if (!Number.isFinite(delay) || delay < 0 || delay > 10000) {
         delay = 800;
       }
-      clearTimeout(this.saveDelay);
       this.saveDelay = setTimeout(() => {
-        window.parent.fetchAndSaveData(this.data);
+        console.log(`this.ctrlChange == ${JSON.stringify(this.ctrlChange)}`);
+        console.log("saving change...")
+        window.parent.fetchAndSaveData(true);
       },delay);
     }
   
@@ -141,7 +142,7 @@ export default class Controls {
     }
   
     btnClick(e,prop,input) {
-      console.log(`Controls class has received a button click. Values are:\nprop==${JSON.stringify(prop)}, value==${input}`);
+      // console.log(`Controls class has received a button click. Values are:\nprop==${JSON.stringify(prop)}, value==${input}`);
       e.stopPropagation(); // so that clicking it doesn't hide the controls view
   
       // we call showControls just to reset the hideDelay timer
@@ -154,22 +155,25 @@ export default class Controls {
       if (typeof prop == "string" && typeof input != undefined) {
         // if the input is a number, add it to the current value
         if (Number.isFinite(input)) {
-          console.log(`Control change: ${prop} changed by ${input}`);
-          this.ctrlChange[prop] = input + this.data.settings[prop];
+          // console.log(`Control change: ${prop} changed by ${input}`);
+          // top-level property
+          if (typeof prop == "string") {
+            this.ctrlChange[prop] = input + this.data.settings[prop];
+          }
         } 
         // otherwise, replace the old value with it
         else {
           this.ctrlChange[prop] = input;
         }
 
-        console.log(`Control change: ${prop} == ${this.ctrlChange[prop]}`);
+        // console.log(`Control change: ${prop} == ${this.ctrlChange[prop]}`);
       }
       
-      // MULTIPLE PROPERTY CHANGE
+      // MULTIPLE/NESTED PROPERTY CHANGE
       else if (typeof prop == "object" && prop != null && typeof input === "undefined") {
-        this.ctrlChange = prop;
+        this.ctrlChange = structuredClone(prop);
 
-        console.log(`Control change: ${JSON.stringify(this.ctrlChange)}`);
+        // console.log(`Control change: ${JSON.stringify(this.ctrlChange)}`);
       }
 
       // console.log(`typeof prop == "object": ${typeof prop == "object"} (typeof prop: ${typeof prop})`);

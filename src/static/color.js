@@ -5,15 +5,12 @@ import ColorControls from './ColorControls.mjs';
     const colorCtrls = new ColorControls();
 
     // dynamically load scene data from flask server
-    window.fetchAndSaveData = async function () {
+    window.fetchAndSaveData = async function (changed) {
         // first, if a change was made (e.g. the user changed the temp threshold through the UI)
         // since the server was last polled, we need to update the server with the changes
         // before getting updated data from it
-        if (colorCtrls.changed) {
+        if (changed) {
             console.log("control change occurred, sending to server to save to file...")
-
-            // change the flag back to false
-            colorCtrls.changed = false;
 
             // send update to server to save to file
             const fetchRequest = {

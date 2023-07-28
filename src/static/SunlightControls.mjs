@@ -6,10 +6,15 @@ export default class SunlightControls extends Controls {
   updateCtrls(data) {
     super.updateCtrls(data);
 
-    // // update threshold values for temp and humidity
-    // document.querySelector("#temp_controls .current_setting").innerHTML = this.data.settings.temp_target;
-    // document.querySelector("#hum_controls .current_setting").innerHTML = this.data.settings.rel_hum_max;
+    // // update values for ceiling brightness
+    document.querySelector("#ceiling_controls .current_setting").innerHTML = `${Math.round(100 * this.data.settings.group.ceiling.brt_adjust)}%`;
   }
+
+  // // !!!!! TEMPORARY, TO STOP AUTOHIDE !!!!!! //
+  // showControls() {
+  //   super.showControls();
+  //   clearTimeout(this.hideDelay);
+  // }
 
   setElementSizes() {
     super.setElementSizes();
@@ -35,7 +40,16 @@ export default class SunlightControls extends Controls {
   setEvents() {
     super.setEvents();
 
-    // // control buttons
-    // document.querySelector("#temp_controls .button.up").addEventListener("mousedown", (e) => {this.btnClick(e,'temp_target',1);});
+    // control buttons
+    document.querySelector("#ceiling_controls .button.up").addEventListener("mousedown", (e) => {
+      var change = {"group" : structuredClone(this.data.settings.group)};
+      change.group.ceiling.brt_adjust = Math.max(0,Math.min(1,Math.round(10*(change.group.ceiling.brt_adjust + .1))/10));
+      this.btnClick(e,change);
+    });
+    document.querySelector("#ceiling_controls .button.down").addEventListener("mousedown", (e) => {
+      var change = {"group" : structuredClone(this.data.settings.group)};
+      change.group.ceiling.brt_adjust = Math.max(0,Math.min(1,Math.round(10*(change.group.ceiling.brt_adjust - .1))/10));
+      this.btnClick(e,change);
+    });
   }
 }

@@ -60,11 +60,11 @@ import ThermControls from './ThermControls.mjs';
 
 
   // dynamically load scene data from flask server
-  window.fetchAndSaveData = async function () {
+  window.fetchAndSaveData = async function (changed) {
     // first, if a change was made (e.g. the user changed the temp threshold through the UI)
     // since the server was last polled, we need to update the server with the changes
     // before getting updated data from it
-    if (thermCtrls.changed) {
+    if (changed) {
       console.log("control change occurred, sending to server to save to file...")
 
       // send update to server to save to file
@@ -83,9 +83,6 @@ import ThermControls from './ThermControls.mjs';
       } else {
         console.log(response.status)
       }
-
-      // change the flag back to false
-      thermCtrls.changed = false;
     }
 
 

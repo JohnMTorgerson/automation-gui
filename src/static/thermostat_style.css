@@ -139,9 +139,10 @@ canvas {
   /* padding-top: .3em; */
   margin-left: var(--margin);
   margin-right: var(--margin);
+  --icon_size: 0.7em;
 }
 
-#current_values .outdoor .weather_icon {
+.weather_icon {
   content: '';
   background-color: var(--maincolor_faded);
 
@@ -149,11 +150,10 @@ canvas {
   mask-repeat: no-repeat; 
   mask-position-x: center;
 
-  --size: 0.7em;
-  mask-size: var(--size);
-  mask-position-y: calc(var(--size)/10);
-  width: calc(var(--size) * 1.3);
-  height: var(--size);
+  mask-size: var(--icon_size);
+  mask-position-y: calc(var(--icon_size)/10);
+  width: calc(var(--icon_size) * 1.3);
+  height: var(--icon_size);
 }
 
 #current_values .outdoor > .temp {
@@ -217,6 +217,10 @@ canvas {
   background: linear-gradient(180deg, rgba(0,0,0,.5) 1.5em, rgba(0,0,0,0.85) 2.5em);
 }
 
+.controls .label {
+  position: absolute; 
+}
+
 #temp_controls,
 #temp_controls .button {
   --color:var(--maincolor);
@@ -249,12 +253,17 @@ canvas {
   font-size: 1em;
   font-family: 'Twobit';
   text-transform: uppercase;
-  gap: 0.2em;
+  /* gap: 0.2em; */
   margin-right: 0.2em;
   margin-left: 0.2em;
 }
 #hum_controls .weather_checkbox {
   justify-content: right;
+}
+
+.weather_checkbox .weather_icon {
+  --icon_size: 1.5em;
+  background-color: var(--color);
 }
 
 input {
@@ -264,6 +273,7 @@ input {
   padding: 0.5em !important;
   background-color: rgba(0,0,0,.5);
   border-radius: 0.35em !important;
+  margin:0px;
 }
 
 input:checked::after {
@@ -305,7 +315,6 @@ input:checked::after {
 #show_weather_controls label {
   font-family: 'WarGames';
   font-size: var(--mainfontsize);
-  color:
 }
 
 /* .current_setting {

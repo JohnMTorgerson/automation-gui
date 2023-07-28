@@ -62,11 +62,91 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+/* ------------------- CONTROLS ------------------ */
+
+
+#controls_container {
+  --font_size: 40px;
+  --maincolor: rgba(92,178,255,1); /*rgba(112,156,255,1);*/
+  --maincolor_faded: rgba(112,156,255,.5);
+  background-color: rgba(0,0,0,0.8);
+  text-shadow:0 0 1.3em black,
+              0 0 .8em black,
+              0 0 .5em black;
+  font-size: var(--font_size);
+}
+
+.controls {
+  display: grid;
+  grid-template-areas: "label     label"
+                       "buttons current";
+
+  gap: 0.3em;
+  padding: 0.3em;
+  justify-items: center;
+}
+
+.controls .label {
+  grid-area: label;
+  justify-self: stretch;
+  writing-mode: horizontal-tb;
+  height: auto;
+  font-size: 0.8em;
+  letter-spacing: 0.2em;
+  transform:scaleX(1.5);
+  background: none;
+  opacity: 1;
+}
+
+.button_container {
+  grid-area: buttons;
+}
+.controls .button {
+  font-size: 0.8em;
+}
+
+.current {
+  grid-area: current;
+  font-size: 1.2em;
+  width: 4.5em;
+}
+.current .units {
+  font-size: 0.7em;
+  font-family: "WarGames";
+  line-height: 1em;
+  opacity:0.7;
+  /* transform: scaleX(0.8); */
+}
+.current .units :first-child {
+  position: relative;
+  z-index:2;
+}
+.current .units :last-child {
+  position: relative;
+  z-index:1;
+  /* opacity: 0.9; */
+}
+
 #onoff_switch {
   --bg_color_on: rgba(248,137,36,.5); /* rgba(247,104,11,.5);*/
 }
 
 .button {
-  --color: rgba(92,178,255,1); /*rgba(112,156,255,1);*/
-  --color_faded: rgba(112,156,255,.5);
+  --color: var(--maincolor);/*rgba(112,156,255,1);*/
+  --color_faded: var(--maincolor_faded);
 }
+
+#ceiling_controls,
+#ceiling_controls .button {
+  --color: var(--maincolor);
+  --color_faded: var(--maincolor_faded);
+  --opacity_factor: 1.11;
+  --opacity_factor_less: 1;
+}
+#ceiling_controls {
+  width: auto;
+}
+#ceiling_controls .label {
+  /* letter-spacing: -.2em; */
+}
+

@@ -14,6 +14,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-start;
+    align-content: flex-start;
     flex-wrap: wrap;
 }
   
@@ -125,13 +126,17 @@
     background-color: rgba(0,0,0,.2);
     color: var(--color);
     opacity: .7;/* calc(.7 * var(--opacity_factor_less));*/
-    position: absolute;
     font-family: 'Twobit';
     font-size: 1.5em;
     text-transform: uppercase;
     writing-mode: vertical-rl;
     text-orientation: upright;
-    text-align: right;
+    text-align: center;
+    height: 0px;
+    overflow-y: visible;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
   
 #onoff_switch {
