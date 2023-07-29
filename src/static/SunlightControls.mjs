@@ -7,7 +7,7 @@ export default class SunlightControls extends Controls {
     super.updateCtrls(data);
 
     // // update values for ceiling brightness
-    document.querySelector("#ceiling_controls .current_setting").innerHTML = `${Math.round(100 * this.data.settings.group.ceiling.brt_adjust)}%`;
+    document.querySelector("#ceiling_controls .current_setting").innerHTML = `${Math.round(100 * this.data.settings.group.ceiling.brt_user_adjust)}%`;
   }
 
   // // !!!!! TEMPORARY, TO STOP AUTOHIDE !!!!!! //
@@ -43,12 +43,12 @@ export default class SunlightControls extends Controls {
     // control buttons
     document.querySelector("#ceiling_controls .button.up").addEventListener("mousedown", (e) => {
       var change = {"group" : structuredClone(this.data.settings.group)};
-      change.group.ceiling.brt_adjust = Math.max(0,Math.min(1,Math.round(10*(change.group.ceiling.brt_adjust + .1))/10));
+      change.group.ceiling.brt_user_adjust = Math.max(0,Math.min(1,Math.round(10*(change.group.ceiling.brt_user_adjust + .1))/10));
       this.btnClick(e,change);
     });
     document.querySelector("#ceiling_controls .button.down").addEventListener("mousedown", (e) => {
       var change = {"group" : structuredClone(this.data.settings.group)};
-      change.group.ceiling.brt_adjust = Math.max(0,Math.min(1,Math.round(10*(change.group.ceiling.brt_adjust - .1))/10));
+      change.group.ceiling.brt_user_adjust = Math.max(0,Math.min(1,Math.round(10*(change.group.ceiling.brt_user_adjust - .1))/10));
       this.btnClick(e,change);
     });
   }
