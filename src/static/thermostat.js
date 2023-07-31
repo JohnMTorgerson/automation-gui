@@ -93,7 +93,11 @@ import ThermControls from './ThermControls.mjs';
       if (response.ok) {
         let data = await response.json();
 
-        updateData(data);
+        if (!data.hasOwnProperty("error")) {
+          updateData(data);
+        } else {
+          console.log(`Unable to retrieve data from file, waiting till next update cycle`);
+        }
 
       } else {
         // do nothing and just wait until the next interval

@@ -58,13 +58,23 @@ canvas {
   align-items: stretch;
   justify-content: space-between;
 
-  text-shadow:0 0 40px black,
+  /* text-shadow:0 0 40px black,
               0 0 40px black,
               0 0 40px black,
               0 0 25px black,
               0 0 25px black,
-              0 0 25px black;
-              /* 0 0 15px black; */
+              0 0 25px black,
+              0 0 15px black; */
+
+  text-shadow:0 0 30px black,
+              0 0 30px black,
+              0 0 30px black,
+              0 0 15px black,
+              0 0 15px black,
+              0 0 15px black,
+              0 0 15px black,
+              0 0 10px black,
+              0 0 10px black;
 }
 
 /* #current_values > div {
@@ -131,20 +141,27 @@ canvas {
   font-family: 'Twobit';
   font-size: var(--fontSize);
   visibility: hidden;
+  opacity: 0.8;
 }
 
 #current_values .outdoor > div {
-  --margin: 0;
+  --margin: 0.2em;
   box-sizing: border-box;
   /* padding-top: .3em; */
   margin-left: var(--margin);
   margin-right: var(--margin);
-  --icon_size: 0.7em;
+  --icon_size: 1em;
 }
 
 .weather_icon {
+  width: calc(var(--icon_size) * 1.3);
+  height: var(--icon_size);
+}
+
+.weather_icon::before {
   content: '';
-  background-color: var(--maincolor_faded);
+  display:block;
+  background-color: var(--bg_color);
 
   mask-image: url("images/cloud-icon.png");
   mask-repeat: no-repeat; 
@@ -154,10 +171,18 @@ canvas {
   mask-position-y: calc(var(--icon_size)/10);
   width: calc(var(--icon_size) * 1.3);
   height: var(--icon_size);
+
+}
+
+#current_values .weather_icon {
+  filter: drop-shadow(0 0 6px black)
+          drop-shadow(0 0 5px black)
+          drop-shadow(0 0 5px rgba(0,0,0,0.5))
+          drop-shadow(0 0 3px black);
 }
 
 #current_values .outdoor > .temp {
-  color: var(--maincolor_faded);
+  color: var(--maincolor);
   width: calc(50% - var(--margin) * 2);
   display:flex;
   justify-content: left;
@@ -165,19 +190,19 @@ canvas {
   visibility: hidden;
 }
 #current_values .outdoor > .temp .weather_icon {
-  background-color: var(--maincolor_faded);
-  order:1;
+  --bg_color: var(--maincolor);
+  /* order:2; */
 }
 #current_values .outdoor .temp .temp {
-  font-size: 0.7em;
-  margin-right: -.1em;
-  order:2;
+  font-size: 1em;
+  margin-right: -.2em;
+  /* order:1; */
 }
 #current_values .outdoor .temp .time_since_current {
   font-family: "WarGames";
-  font-size: 0.5em;
-  margin-bottom: -.07em;
-  order:3;
+  font-size: 0.7em;
+  margin-bottom: -.1em;
+  /* order:3; */
   text-shadow:0 0 25px black,
               0 0 25px black,
               0 0 15px black,
@@ -190,7 +215,7 @@ canvas {
   /* --hummargin: 0px;
   margin-left: var(--hummargin);
   margin-right: var(--hummargin); */
-  color: var(--secondarycolor_faded);
+  color: var(--secondarycolor);
   width: calc(50% - var(--margin) * 2);
   display:flex;
   justify-content: right;
@@ -198,11 +223,12 @@ canvas {
   visibility: hidden;
 }
 #current_values .outdoor > .hum .weather_icon {
-  background-color: var(--secondarycolor_faded);
-  order:1
+  --bg_color: var(--secondarycolor);
+  /* order:1; */
 }
 #current_values .outdoor .hum .hum {
-  font-size: 0.7em;
+  font-size: 1em;
+  /* order:2; */
 }
 
 
@@ -263,7 +289,9 @@ canvas {
 
 .weather_checkbox .weather_icon {
   --icon_size: 1.5em;
-  background-color: var(--color);
+  --bg_color: var(--color);
+  filter: drop-shadow(0 0 10px var(--color))
+          drop-shadow(0 0 5px var(--color_faded));
 }
 
 input {
