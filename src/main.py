@@ -321,12 +321,13 @@ def thermostat_control():
     logger.debug("receiving thermostat control change from UI, writing to file...")
     settings_update = request.get_json()
     logger.debug(f"updated settings requested by user:\n{json.dumps(settings_update)}")
-
+    old_settings = None
 
     # first, write settings update to the data.json file that we poll for updates
     try:
         with open(f"{home_auto_path}/data.json", "r+") as f :
             data = json.load(f)
+            old_settings = copy.deepcopy(data["scenes"]["thermostat"]["settings"])
             data["scenes"]["thermostat"]["settings"] |= settings_update
 
             # delete file contents
@@ -345,26 +346,21 @@ def thermostat_control():
     # then, write to the actual thermostat settings file which permanently stores the data
     # (and is polled by the automation script every time it is run by the cron job)
     try:
-        with open(f"{home_auto_path}/scenes/basic/thermostat/settings.json", "r+") as f :
-            settings = json.load(f)
-            settings |= settings_update
-
-            # delete file contents
-            f.seek(0)
-            f.truncate()
-
-            # write updated data to file
-            json.dump(settings, f)
-            logger.debug('successfully updated thermostat settings in settings.json')
-
+        new_settings = home_automation.thermostat_settings_change(settings_update)
     except Exception as e:
         msg = f'Error retrieving/writing thermostat settings to settings.json: {repr(e)}'
         logger.error(msg)
         return msg
+    
+        # run the actual scene!!!
+    if old_settings is not None and not object_equals(new_settings,old_settings):
+        logger.debug(f"thermostat settings are DIFFERENT THAN before, so running thermostat scene...")
+        home_automation.thermostat_scene()
+    else :
+        logger.debug(f"thermostat settings are THE SAME AS before, so *NOT* running thermostat scene...")
 
 
-
-    return jsonify(settings)
+    return jsonify(new_settings)
 
 # ====== CLOCK SCENE ====== #
 
