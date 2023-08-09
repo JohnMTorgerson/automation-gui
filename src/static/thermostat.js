@@ -225,10 +225,12 @@ import ThermControls from './ThermControls.mjs';
     drawEvents(graphCtx,data.logged_sensor,startTime,timeRange)
 
     // draw temp and humidity threshold lines (what the thermostat is set to)
-    if (data.settings.on) {
-      drawThreshold(graphCtx,data.settings.hum_max,currentValueStyles.humColor(0.7),minHum,maxHum);
-      drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(0.6),minTemp,maxTemp);
-    }
+    // if (data.settings.on) {
+      // drawThreshold(graphCtx,data.settings.hum_max,currentValueStyles.humColor(0.7),minHum,maxHum);
+      // drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(0.6),minTemp,maxTemp);
+      drawThresholdLines(graphCtx, data.logged_sensor, "rel_hum_target", currentValueStyles.humColor(0.7), minHum, maxHum, startTime, timeRange);
+      drawThresholdLines(graphCtx, data.logged_sensor, "temp_target", currentValueStyles.tempColor(0.6), minTemp, maxTemp, startTime, timeRange);
+    // }
 
     // only show weather data if the setting is set to true
     if (data.settings.show_weather_graph) {
@@ -531,6 +533,92 @@ import ThermControls from './ThermControls.mjs';
     ctx.stroke();
 
     ctx.setLineDash([]);
+  }
+
+  function drawThresholdLines(ctx, dataLog, param, color, minVal, maxVal, startTime, timeRange) {
+    let y, val, onPoint;
+    let date;
+    ctx.lineCap = "butt";
+
+    for (const timeStr in dataLog) {
+      if (dataLog[timeStr].label) {
+        const label = dataLog[timeStr].label;
+        date = new Date(parseInt(timeStr));
+
+        // if this event is turning the thermostat off, and we've previously saved an onPoint
+        if (onPoint && label.match(/SET on to False/i)) {
+          console.log(`${date} :: SET on to False`);
+
+          // end current threshold line
+          endLine(timeStr);
+
+          // erase onPoint
+          onPoint = null;
+        }
+        // if this event is turning the thermostat on
+        else if (label.match(/SET on to True/i)) {
+          console.log(`${date} :: SET on to True`);
+          
+          // save new onPoint
+          onPoint = parseInt(timeStr);
+
+          // and start new threshold line
+          startLine(timeStr);
+          
+        }
+        // if this line sets a new threshold value
+        else {
+          let re = /\[SET (\w+) to ([0-9\.]+)\]/i;
+          let m = label.match(re);
+          if (Array.isArray(m)) {
+            console.log(`${date} :: ${m.toString()}`);
+          }
+          if (Array.isArray(m) && m.length === 3 && ['temp_target','rel_hum_target'].includes(m[1])) {
+            var entryParam = m[1];
+            val = m[2]; // set new value (val is at the function scope)
+
+            // if the param change is for the param we're currently drawing
+            // and the thermostat was on at this point
+            if (entryParam === param && onPoint) {
+              // end the current line and start a new one
+              endLine(timeStr);
+              startLine(timeStr);
+            }
+          }
+        } // end if-chain asking what this label is for
+      } // end if this line is a label
+    } // end for loop
+
+    // end current line at the right end of the graph
+    endLine(startTime + timeRange);
+
+    ctx.setLineDash([]);
+
+    function startLine(timeStr) {
+      console.log(`- - - - - - - starting new line at ${val} on ${date}`);
+      let timestamp = parseInt(timeStr);
+
+      y = graphHeight * (1 - (val - minVal) / (maxVal - minVal));
+      const x = graphWidth * (timestamp-startTime) / timeRange;
+
+      const lineWidth = fontSize/4;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lineWidth;
+      ctx.setLineDash([lineWidth*1.5,lineWidth*2]);
+  
+      ctx.beginPath();
+      ctx.moveTo(x,y);
+    }
+
+    function endLine(timeStr) {
+      console.log(`- - - - - - - - ending old line at ${(1 - y/graphHeight)*(maxVal-minVal) + minVal} on ${date}`);
+      let timestamp = parseInt(timeStr);
+
+      const x = graphWidth * (timestamp-startTime) / timeRange;
+
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
   }
 
 
