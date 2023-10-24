@@ -137,7 +137,9 @@ body {
 }
 
 #ceiling_controls,
-#ceiling_controls .button {
+#ceiling_controls .button,
+#lamp_controls,
+#lamp_controls .button {
   --color: var(--maincolor);
   --color_faded: var(--maincolor_faded);
   --opacity_factor: 1.11;

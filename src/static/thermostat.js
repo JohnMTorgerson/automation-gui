@@ -186,17 +186,15 @@ import ThermControls from './ThermControls.mjs';
 
     // then expand again as needed based on weather data
     // if we're showing the weather data on the graph
-    if (data.settings.show_weather_graph) {
-      if (data.settings.show_weather_temp) {
-        tempRange = findValuesRangeInTimeRange(data.logged_weather, "Temperature (degrees F)", startTime);
-        minTemp = Math.min(minTemp, Math.floor(tempRange.min-1));
-        maxTemp = Math.max(maxTemp, Math.ceil(tempRange.max+2));
-      }
-      if (data.settings.show_weather_hum) {
-        humRange = findValuesRangeInTimeRange(data.logged_weather, "Relative Humidity (%)", startTime);
-        minHum = Math.min(minHum, Math.floor(humRange.min-1));
-        maxHum = Math.max(maxHum, Math.ceil(humRange.max+2));
-      }
+    if (data.settings.show_weather_temp_graph) {
+      tempRange = findValuesRangeInTimeRange(data.logged_weather, "Temperature (degrees F)", startTime);
+      minTemp = Math.min(minTemp, Math.floor(tempRange.min-1));
+      maxTemp = Math.max(maxTemp, Math.ceil(tempRange.max+2));
+    }
+    if (data.settings.show_weather_hum_graph) {
+      humRange = findValuesRangeInTimeRange(data.logged_weather, "Relative Humidity (%)", startTime);
+      minHum = Math.min(minHum, Math.floor(humRange.min-1));
+      maxHum = Math.max(maxHum, Math.ceil(humRange.max+2));
     }
 
     // set defaults in case there is no data at all
@@ -228,14 +226,20 @@ import ThermControls from './ThermControls.mjs';
     // if (data.settings.on) {
       // drawThreshold(graphCtx,data.settings.hum_max,currentValueStyles.humColor(0.7),minHum,maxHum);
       // drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(0.6),minTemp,maxTemp);
-      drawThresholdLines(graphCtx, data.logged_sensor, "rel_hum_target", currentValueStyles.humColor(0.7), minHum, maxHum, startTime, timeRange);
+      drawThresholdLines(graphCtx, data.logged_sensor, "rel_hum_max", currentValueStyles.humColor(0.7), minHum, maxHum, startTime, timeRange);
       drawThresholdLines(graphCtx, data.logged_sensor, "temp_target", currentValueStyles.tempColor(0.6), minTemp, maxTemp, startTime, timeRange);
     // }
 
     // only show weather data if the setting is set to true
-    if (data.settings.show_weather_graph) {
-      drawWeatherData(graphCtx,data.settings,data.logged_weather,startTime,timeRange,minTemp,maxTemp,minHum,maxHum)
+    if (data.settings.show_weather_temp_graph) {
+      drawWeatherData("temp",graphCtx,data.settings,data.logged_weather,startTime,timeRange,minTemp,maxTemp)
     }
+    if (data.settings.show_weather_hum_graph) {
+      drawWeatherData("hum",graphCtx,data.settings,data.logged_weather,startTime,timeRange,minHum,maxHum)
+    }
+
+    // show current weather values (if settings call for it)
+    updateWeatherValues(data.logged_weather,data.settings)
 
     // draw sensor data
     drawSensorData(graphCtx,data.logged_sensor,startTime,timeRange,minTemp,maxTemp,minHum,maxHum);
@@ -283,14 +287,14 @@ import ThermControls from './ThermControls.mjs';
     // drawCurrentValues(graphCtx,data.current,currentValueStyles); // to draw them on the canvas
     updateCurrentValues(data.current); // new approach: using an HTML element on top of the canvas
 
-    const outdoorValuesEl = document.querySelector("#current_values > .outdoor");
-    if (data.settings.show_weather_values) {
-      // drawWeatherValues(graphCtx,data.settings,data.logged_weather,weatherStyles,currentValueStyles.fontSize);
-      updateWeatherValues(data.logged_weather,data.settings);
-      outdoorValuesEl.style.visibility = "visible";
-    } else {
-      outdoorValuesEl.style.visibility = "hidden";
-    }
+    // const outdoorValuesEl = document.querySelector("#current_values > .outdoor");
+    // if (data.settings.show_weather_values) {
+    //   // drawWeatherValues(graphCtx,data.settings,data.logged_weather,weatherStyles,currentValueStyles.fontSize);
+    //   updateWeatherValues(data.logged_weather,data.settings);
+    //   outdoorValuesEl.style.visibility = "visible";
+    // } else {
+    //   outdoorValuesEl.style.visibility = "hidden";
+    // }
   }
 
 
@@ -570,16 +574,17 @@ import ThermControls from './ThermControls.mjs';
         else {
           let re = /\[SET (\w+) to ([0-9\.]+)\]/i;
           let m = label.match(re);
-          if (Array.isArray(m)) {
-            console.log(`${date} :: ${m.toString()}`);
-          }
-          if (Array.isArray(m) && m.length === 3 && ['temp_target','rel_hum_target'].includes(m[1])) {
+          // if (Array.isArray(m)) {
+          //   console.log(`${date} :: ${m.toString()}`);
+          // }
+          if (Array.isArray(m) && m.length === 3 && ['temp_target','rel_hum_max'].includes(m[1])) {
             var entryParam = m[1];
             val = m[2]; // set new value (val is at the function scope)
 
             // if the param change is for the param we're currently drawing
             // and the thermostat was on at this point
             if (entryParam === param && onPoint) {
+              console.log(`${date} :: ${m.toString()}`);
               // end the current line and start a new one
               endLine(timeStr);
               startLine(timeStr);
@@ -590,7 +595,9 @@ import ThermControls from './ThermControls.mjs';
     } // end for loop
 
     // end current line at the right end of the graph
-    endLine(startTime + timeRange);
+    if (onPoint) {
+      endLine(startTime + timeRange);
+    }
 
     ctx.setLineDash([]);
 
@@ -615,6 +622,8 @@ import ThermControls from './ThermControls.mjs';
       let timestamp = parseInt(timeStr);
 
       const x = graphWidth * (timestamp-startTime) / timeRange;
+
+      console.log(`ending line at x == ${x}`);
 
       ctx.lineTo(x, y);
       ctx.stroke();
@@ -684,64 +693,55 @@ import ThermControls from './ThermControls.mjs';
 
   }
 
-  function drawWeatherData(ctx, settings, weatherData, startTime, timeRange, minTemp, maxTemp, minHum, maxHum) {
+  function drawWeatherData(dataKind, ctx, settings, weatherData, startTime, timeRange, min, max) {
     // console.log("drawSensorData...");
     const lineWidth = fontSize/4;
     ctx.setLineDash([0,lineWidth*2]);
     ctx.lineCap = "round";
     ctx.lineWidth = lineWidth;
 
-    const tempColor = mainColor(.5);
-    const humColor = secondaryColor(.55);
+    let color, dataLabel;
+    switch(dataKind) {
+      case "temp":
+        color = mainColor(.5);
+        dataLabel = "Temperature (degrees F)";
+        break;
+      case "hum":
+        color = secondaryColor(.55);
+        dataLabel = "Relative Humidity (%)";
+        break;
+    }
 
-    const tempRange = maxTemp - minTemp;
-    const humRange = maxHum - minHum;
-    let xLast, tempLast, humLast;
+    const range = max - min;
+    let xLast, yLast;
     // let events = {}; // store event information like "[turned A/C on]";
     for (const key in weatherData) {
       const timestamp = parseInt(key);
 
       // if this entry is within the time range of the graph (plus a 24 hour buffer so we catch all the data on the left edge)
       if (timestamp > startTime - (1000 * 60 * 60 * 24)) {
-        let time = new Date(timestamp);
-        time = `${time.getHours()}:${time.getMinutes()}`;
+        // let time = new Date(timestamp);
+        // time = `${time.getHours()}:${time.getMinutes()}`;
         // console.log(`Time: ${time}`);
         const x = graphWidth * (timestamp-startTime) / timeRange;
-        const temp = graphHeight * (1 - (parseFloat(weatherData[key]["Temperature (degrees F)"]) - minTemp) / tempRange);
-        const hum = graphHeight * (1 - (parseFloat(weatherData[key]["Relative Humidity (%)"]) - minHum) / humRange);
+        const value = parseFloat(weatherData[key][dataLabel])
+        const y = graphHeight * (1 - (value - min) / range);
 
-        if (!isNaN(temp) && !isNaN(hum)) {
+        if (!isNaN(y)) {
           // console.log(`x:${x}, tempY:${temp}, humY:${hum}`);
 
           // draw hum
-          if (settings.show_weather_hum) {
-            ctx.strokeStyle = humColor;
-            ctx.beginPath();
-            if (xLast && !isNaN(humLast)) {
-              ctx.moveTo(xLast,humLast);
-            }
-            // drawDataPoint(ctx,x,y);
-            ctx.lineTo(x, hum);
-            ctx.stroke();
-            humLast = hum;
+          ctx.strokeStyle = color;
+          ctx.beginPath();
+          if (xLast && !isNaN(yLast)) {
+            ctx.moveTo(xLast,yLast);
           }
-
-
-          // draw temp
-          if (settings.show_weather_temp) {
-            ctx.strokeStyle = tempColor;
-            ctx.beginPath();
-            if (xLast && !isNaN(tempLast)) {
-              ctx.moveTo(xLast,tempLast);
-            }
-            // drawDataPoint(ctx,x,y);
-            ctx.lineTo(x, temp);
-            ctx.stroke();
-            tempLast = temp;
-          }
+          // drawDataPoint(ctx,x,y);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+          yLast = y;
 
           xLast = x;
-
 
         } else {
           // events[key] = sensorData[key].label
@@ -903,14 +903,14 @@ import ThermControls from './ThermControls.mjs';
     const hum_value_el = document.querySelector("#current_values .outdoor > .hum");
 
 
-    if (settings.show_weather_temp) {
+    if (settings.show_weather_temp_value) {
       document.querySelector("#current_values .outdoor .temp .temp").innerHTML = temp + "°";
       document.querySelector("#current_values .outdoor .temp .time_since_current").innerHTML = `(${ago})`;
       temp_value_el.style.visibility = "visible";
     } else {
       temp_value_el.style.visibility = "hidden";
     }
-    if (settings.show_weather_hum) {
+    if (settings.show_weather_hum_value) {
       document.querySelector("#current_values .outdoor .hum .hum").innerHTML = hum + '%';
       hum_value_el.style.visibility = "visible";
     } else {

@@ -136,7 +136,7 @@ def sunlight_control(obj=None):
     # then, write to the actual settings file which permanently stores the data
     # (and is polled by the automation script every time it is run by the cron job)
     try:
-        with open(f"{home_auto_path}/scenes/timebased/sunlight/settings.json", "r+") as f :
+        with open(f"{home_auto_path}/scenes/sunlight/settings.json", "r+") as f :
             settings = json.load(f)
             settings |= settings_update
 
@@ -250,7 +250,7 @@ def color_control(obj=None):
     # then, write to the actual settings file which permanently stores the data
     # (and is polled by the automation script every time it is run by the cron job)
     try:
-        with open(f"{home_auto_path}/scenes/basic/color/settings.json", "r+") as f :
+        with open(f"{home_auto_path}/scenes/color/settings.json", "r+") as f :
             settings = json.load(f)
             settings |= settings_update
 

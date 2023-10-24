@@ -140,7 +140,7 @@ canvas {
   /* gap: 10px 0; */
   font-family: 'Twobit';
   font-size: var(--fontSize);
-  visibility: hidden;
+  visibility: visible;
   opacity: 0.8;
 }
 
@@ -154,7 +154,7 @@ canvas {
 }
 
 .weather_icon {
-  width: calc(var(--icon_size) * 1.3);
+  width: calc(var(--icon_size));/* * 1.3);*/
   height: var(--icon_size);
 }
 
@@ -169,7 +169,7 @@ canvas {
 
   mask-size: var(--icon_size);
   mask-position-y: calc(var(--icon_size)/10);
-  width: calc(var(--icon_size) * 1.3);
+  width: calc(var(--icon_size));/* * 1.3);*/
   height: var(--icon_size);
 
 }
@@ -185,6 +185,7 @@ canvas {
   color: var(--maincolor);
   width: calc(50% - var(--margin) * 2);
   display:flex;
+  column-gap: 0.1em;
   justify-content: left;
   align-items:end;
   visibility: hidden;
@@ -218,6 +219,7 @@ canvas {
   color: var(--secondarycolor);
   width: calc(50% - var(--margin) * 2);
   display:flex;
+  column-gap: 0.2em;
   justify-content: right;
   align-items:end;
   visibility: hidden;
@@ -271,6 +273,7 @@ canvas {
 
 .weather_checkbox {
   display: flex;
+  column-gap: .25em;
   align-items: center;
   justify-content: left;
   width: 100%;
@@ -304,7 +307,7 @@ input {
   margin:0px;
 }
 
-input:checked::after {
+input:checked::before {
   --margin: 0.1em;
   content: '';
   /* content: '\2713'; */
@@ -319,6 +322,51 @@ input:checked::after {
   height: calc(100% - 2 * var(--margin));
   margin: var(--margin);
   border-radius: 0.17em;
+}
+
+input.value.temp::after {
+  content: '°';
+  font-size: 1.5em;
+  margin-top: .175em;
+}
+
+input.value.hum::after {
+  content: '%';
+  font-family: 'Twobit';
+  font-size: 1em;
+  margin-top: -.03em;
+  margin-left: .03em;
+}
+
+input.graph::after {
+  --shadow-color: var(--color);
+  content: 'ᛋ';
+  opacity: 0.6;
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%) scaleX(-100%) skewX(20deg) skewY(-10deg);
+  text-shadow: .015em .025em 0 var(--shadow-color);
+  margin-top: -.15em;
+  margin-left: .05em;
+  line-height: 0px;
+  font-weight: bolder;
+}
+
+input.value::after {
+  opacity: 0.6;
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  line-height: 0px;
+}
+
+input:checked::after {
+  color: black;
+  --shadow-color: black;
 }
 
 #temp_controls .current {
