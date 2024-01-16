@@ -113,6 +113,12 @@ canvas {
   text-align: right;
 }
 
+#current_values .indoor .hum .units_small {
+  font-size:.5em;
+  position: relative;
+  bottom: .4em;
+}
+
 #current_values .indoor .temp.mainunits {
   width: calc(50% - var(--margin) * 2);
   text-align: left;

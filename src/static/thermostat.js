@@ -145,6 +145,18 @@ import ThermControls from './ThermControls.mjs';
       return;
     }
 
+    // add separate humidity settings to the ''data'' object,
+    // so that we can access it without knowing or caring if it's
+    // using relative or absolute humidity
+    let abs = data.settings.use_abs_humidity;
+    data.hum = {
+      abs: abs,
+      max: abs ? data.settings.abs_hum_max : data.settings.rel_hum_max,
+      min: abs ? data.settings.abs_hum_min : data.settings.rel_hum_min,
+      hyst: abs ? data.settings.abs_hum_hyst : data.settings.rel_hum_hyst,
+      units: abs ? "g/m³" : "%"
+    }
+
     // console.log(JSON.stringify(data.current));
 
     // update thresholds on control screen
@@ -172,15 +184,15 @@ import ThermControls from './ThermControls.mjs';
     if (data.settings.on) {
       maxTemp = data.settings.temp_target + 3;//81;
       minTemp = data.settings.temp_target - data.settings.temp_hyst - 3;//74;
-      maxHum = data.settings.rel_hum_max + 3;//41;
-      minHum = data.settings.rel_hum_max - data.settings.rel_hum_hyst - 3;//34;
+      maxHum = data.hum.max + (data.hum.abs ? 0.5 : 3);//41;
+      minHum = data.hum.max - data.hum.hyst - (data.hum.abs ? 0.5 : 3);//34;
     }
 
     // then expand the ranges as needed based on the values that appear in the data in our time range
     let tempRange = findValuesRangeInTimeRange(data.logged_sensor, "temp", startTime);
     minTemp = Math.min(minTemp, Math.floor(tempRange.min-1));
     maxTemp = Math.max(maxTemp, Math.ceil(tempRange.max+2));
-    let humRange = findValuesRangeInTimeRange(data.logged_sensor, "rel_hum", startTime);
+    let humRange = findValuesRangeInTimeRange(data.logged_sensor, data.hum.abs ? "abs_hum" : "rel_hum", startTime);
     minHum = Math.min(minHum, Math.floor(humRange.min-1));
     maxHum = Math.max(maxHum, Math.ceil(humRange.max+2));
 
@@ -200,8 +212,8 @@ import ThermControls from './ThermControls.mjs';
     // set defaults in case there is no data at all
     if (minTemp === minTempExtreme) minTemp = 68;
     if (maxTemp === maxTempExtreme) maxTemp = 82;
-    if (minHum === minHumExtreme) minHum = 38;
-    if (maxHum === maxHumExtreme) maxHum = 52;
+    if (minHum === minHumExtreme) minHum = data.hum.abs ? 5 : 38;
+    if (maxHum === maxHumExtreme) maxHum = data.hum.abs ? 15 : 52;
 
     // then save the adjusted ranges
     tempRange = maxTemp - minTemp;
@@ -226,7 +238,7 @@ import ThermControls from './ThermControls.mjs';
     // if (data.settings.on) {
       // drawThreshold(graphCtx,data.settings.hum_max,currentValueStyles.humColor(0.7),minHum,maxHum);
       // drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(0.6),minTemp,maxTemp);
-      drawThresholdLines(graphCtx, data.logged_sensor, "rel_hum_max", currentValueStyles.humColor(0.7), minHum, maxHum, startTime, timeRange);
+      drawThresholdLines(graphCtx, data.logged_sensor, data.hum.abs ? "abs_hum_max" : "rel_hum_max", currentValueStyles.humColor(0.7), minHum, maxHum, startTime, timeRange);
       drawThresholdLines(graphCtx, data.logged_sensor, "temp_target", currentValueStyles.tempColor(0.6), minTemp, maxTemp, startTime, timeRange);
     // }
 
@@ -242,7 +254,7 @@ import ThermControls from './ThermControls.mjs';
     updateWeatherValues(data.logged_weather,data.settings)
 
     // draw sensor data
-    drawSensorData(graphCtx,data.logged_sensor,startTime,timeRange,minTemp,maxTemp,minHum,maxHum);
+    drawSensorData(graphCtx,data.logged_sensor,data.hum,startTime,timeRange,minTemp,maxTemp,minHum,maxHum);
 
     // draw outline
     graphCtx.strokeStyle = mainColor();
@@ -270,7 +282,7 @@ import ThermControls from './ThermControls.mjs';
     drawBG(humCtx,humLabels);
 
     // draw y axis labels
-    drawHumLabels(humCtx,humLabels,minHum,maxHum,humStyles);
+    drawHumLabels(humCtx,humLabels,minHum,maxHum,humStyles,data.hum);
 
 
     // ====== DRAW X LABELS ====== //
@@ -285,7 +297,7 @@ import ThermControls from './ThermControls.mjs';
 
     // ====== DRAW CURRENT VALUE LABELS ====== //
     // drawCurrentValues(graphCtx,data.current,currentValueStyles); // to draw them on the canvas
-    updateCurrentValues(data.current); // new approach: using an HTML element on top of the canvas
+    updateCurrentValues(data.current,data.hum); // new approach: using an HTML element on top of the canvas
 
     // const outdoorValuesEl = document.querySelector("#current_values > .outdoor");
     // if (data.settings.show_weather_values) {
@@ -309,20 +321,20 @@ import ThermControls from './ThermControls.mjs';
 
 
 
-  function findValuesRangeInTimeRange(data, key, startTime) {
+  function findValuesRangeInTimeRange(data_log, key, startTime) {
     const range = {
       min: Number.POSITIVE_INFINITY,
       max: Number.NEGATIVE_INFINITY
     };
 
     let foundOne = false;
-    for (const timestring in data) {
+    for (const timestring in data_log) {
       const timestamp = parseInt(timestring);
 
       // if this entry is within the time range of the graph
       if (timestamp > startTime) {
         foundOne = true;
-        const value = parseFloat(data[timestring][key]);
+        const value = parseFloat(data_log[timestring][key]);
 
         if (!isNaN(value)) {
           range.min = Math.min(range.min,value); // update minimum temp
@@ -424,12 +436,17 @@ import ThermControls from './ThermControls.mjs';
   }
 
   // draw humidity labels (y axis)
-  function drawHumLabels(ctx, canvas, minHum, maxHum, styles) {
+  function drawHumLabels(ctx, canvas, minHum, maxHum, styles, humSettings) {
+    var units = humSettings.units;
+    if (humSettings.abs) {
+      units = "g/m3"; // can't use cubed character because font doesn't support it
+    }
+
     const humRange = maxHum - minHum;
 
-    const labelModulus = humRange > 22 ? 10 : (humRange > 9 ? 5 : 2); // range above 22, labels every 10, 10-22, labels every 5, 9 and under, labels every 2
+    const labelModulus = humRange > 22 ? 10 : (humRange > 10 ? 5 : (humRange > 4 ? 2 : 1)); // range above 22, labels every 10, 11-22, labels every 5, 5-10, labels every 2, 4 and under, every 1
     const longTickMod = humRange > 27 ? 99999999 : (humRange > 22 ? 5 : 99999999); // range above 27, we'll use small ticks every two, so no long ticks, range 23-27, long ticks every 5, 22 and below, no long ticks
-    const shortTickMod = humRange > 37 ? 5 : (humRange > 27 ? 2 : 1); // range above 32, ticks only every 5, above 27, every 2, otherwise, every 1;
+    const shortTickMod = humRange > 37 ? 5 : (humRange > 27 ? 2 : (humRange > 10 ? 1 : 0.5)); // range above 32, ticks only every 5, above 27, every 2, above 10, every 1, 10 and below, every 0.5; (non-integer values don't work as is, would have to re-do loop)
 
     const relFontSize = styles.fontSize;
     ctx.textAlign = "left";
@@ -449,9 +466,9 @@ import ThermControls from './ThermControls.mjs';
 
         ctx.fillText(`${i}`, styles.tickLength*1.6, y);
 
-        const pctFontSize = relFontSize * .6
-        ctx.font = `${pctFontSize}px ${font2}`;
-        ctx.fillText(`%`, canvas.width - pctFontSize, y);
+        const unitFontSize = humSettings.abs ? relFontSize * .4 : relFontSize * .6;
+        ctx.font = `${unitFontSize}px ${font2}`;
+        ctx.fillText(units, canvas.width - (relFontSize * .9), y);
       } else if (i%longTickMod === 0) { // draw long tick
         ctx.beginPath();
         ctx.moveTo(0, y);
@@ -577,7 +594,7 @@ import ThermControls from './ThermControls.mjs';
           // if (Array.isArray(m)) {
           //   console.log(`${date} :: ${m.toString()}`);
           // }
-          if (Array.isArray(m) && m.length === 3 && ['temp_target','rel_hum_max'].includes(m[1])) {
+          if (Array.isArray(m) && m.length === 3 && ['temp_target','rel_hum_max','abs_hum_max'].includes(m[1])) {
             var entryParam = m[1];
             val = m[2]; // set new value (val is at the function scope)
 
@@ -631,7 +648,7 @@ import ThermControls from './ThermControls.mjs';
   }
 
 
-  function drawSensorData(ctx, sensorData, startTime, timeRange, minTemp, maxTemp, minHum, maxHum) {
+  function drawSensorData(ctx, sensorData, humSettings, startTime, timeRange, minTemp, maxTemp, minHum, maxHum) {
     // console.log("drawSensorData...");
 
     const tempColor = mainColor();
@@ -653,7 +670,7 @@ import ThermControls from './ThermControls.mjs';
         // console.log(`Time: ${time}`);
         const x = graphWidth * (timestamp-startTime) / timeRange;
         const temp = graphHeight * (1 - (parseFloat(sensorData[key].temp) - minTemp) / tempRange);
-        const hum = graphHeight * (1 - (parseFloat(sensorData[key].rel_hum) - minHum) / humRange);
+        const hum = graphHeight * (1 - (parseFloat(sensorData[key][humSettings.abs?"abs_hum":"rel_hum"]) - minHum) / humRange);
 
         if (!isNaN(temp) && !isNaN(hum)) {
           // console.log(`x:${x}, tempY:${temp}, humY:${hum}`);
@@ -793,48 +810,48 @@ import ThermControls from './ThermControls.mjs';
     }
   }
 
-  function drawCurrentValues(ctx,currentValues,styles) {
-    // console.log(styles.fontSize);
-    ctx.textBaseline = "top";
+  // function drawCurrentValues(ctx,currentValues,styles) {
+  //   // console.log(styles.fontSize);
+  //   ctx.textBaseline = "top";
 
-    for (let i=0; i<5; i++) { // just to make the shadows darker
-      ctx.font = `${styles.fontSize}px ${styles.font}`;
-      ctx.shadowColor = backgroundColor(1);
-      ctx.shadowBlur = styles.fontSize / 2;
+  //   for (let i=0; i<5; i++) { // just to make the shadows darker
+  //     ctx.font = `${styles.fontSize}px ${styles.font}`;
+  //     ctx.shadowColor = backgroundColor(1);
+  //     ctx.shadowBlur = styles.fontSize / 2;
 
-      let y = styles.fontSize / 1.5;
-      let x = styles.fontSize / 4;
+  //     let y = styles.fontSize / 1.5;
+  //     let x = styles.fontSize / 4;
 
-      // draw temp
-      // console.log(`x=${x}, y=${y}`);
-      ctx.textAlign = "left";
-      ctx.fillStyle = styles.tempColor(1);
-      ctx.fillText(currentValues.temp_f + "°", x, y);
+  //     // draw temp
+  //     // console.log(`x=${x}, y=${y}`);
+  //     ctx.textAlign = "left";
+  //     ctx.fillStyle = styles.tempColor(1);
+  //     ctx.fillText(currentValues.temp_f + "°", x, y);
 
-      // draw humidity
-      x = graphWidth;
-      // console.log(`x=${x}, y=${y}`);
-      ctx.textAlign = "right";
-      ctx.fillStyle = styles.humColor(1);
-      ctx.fillText(currentValues.rel_hum + "%", x, y);
+  //     // draw humidity
+  //     x = graphWidth;
+  //     // console.log(`x=${x}, y=${y}`);
+  //     ctx.textAlign = "right";
+  //     ctx.fillStyle = styles.humColor(1);
+  //     ctx.fillText(currentValues.rel_hum + "%", x, y);
 
-      // draw other smaller temp (in other scale)
-      y += styles.fontSize * 1.3;
-      x = styles.fontSize / 4;
-      // console.log(`x=${x}, y=${y}`);
-      ctx.textAlign = "left";
-      ctx.fillStyle = styles.tempColor(.7);
-      ctx.font = `${styles.fontSize * .7}px ${styles.font}`;
-      ctx.fillText(currentValues.temp_c + "°", x, y);
-    }
+  //     // draw other smaller temp (in other scale)
+  //     y += styles.fontSize * 1.3;
+  //     x = styles.fontSize / 4;
+  //     // console.log(`x=${x}, y=${y}`);
+  //     ctx.textAlign = "left";
+  //     ctx.fillStyle = styles.tempColor(.7);
+  //     ctx.font = `${styles.fontSize * .7}px ${styles.font}`;
+  //     ctx.fillText(currentValues.temp_c + "°", x, y);
+  //   }
 
-    ctx.shadowColor = 'transparent';
-  }
+  //   ctx.shadowColor = 'transparent';
+  // }
 
-  function updateCurrentValues(currentValues) {
+  function updateCurrentValues(currentValues,humSettings) {
     document.querySelector("#current_values .indoor .temp.mainunits").innerHTML = currentValues.temp_f + "°";
     document.querySelector("#current_values .indoor .temp.altunits").innerHTML = currentValues.temp_c + "°";
-    document.querySelector("#current_values .indoor .hum").innerHTML = currentValues.rel_hum + "%";
+    document.querySelector("#current_values .indoor .hum").innerHTML = currentValues[humSettings.abs ? "abs_hum" : "rel_hum"] + (humSettings.abs ? `<span class="units_small">${humSettings.units}</span>` : humSettings.units);
   }
 
 

@@ -8,7 +8,8 @@ export default class ThermControls extends Controls {
 
     // update threshold values for temp and humidity
     document.querySelector("#temp_controls .current_setting").innerHTML = this.data.settings.temp_target;
-    document.querySelector("#hum_controls .current_setting").innerHTML = this.data.settings.rel_hum_max;
+    document.querySelector("#hum_controls .current_setting").innerHTML = this.data.hum.max;
+    document.querySelector("#hum_controls .current .units").innerHTML = this.data.hum.abs ? this.data.hum.units : "pct";
 
     console.log(`show_weather_temp_value: ${this.data.settings.show_weather_temp_value}`);
     console.log(`show_weather_temp_graph: ${this.data.settings.show_weather_temp_graph}`);
@@ -49,12 +50,20 @@ export default class ThermControls extends Controls {
     // control buttons
     document.querySelector("#temp_controls .button.up").addEventListener("mousedown", (e) => {this.btnClick(e,'temp_target',1);});
     document.querySelector("#temp_controls .button.down").addEventListener("mousedown", (e) => {this.btnClick(e,'temp_target',-1);});
-    document.querySelector("#hum_controls .button.up").addEventListener("mousedown", (e) => {this.btnClick(e,'rel_hum_max',1);});
-    document.querySelector("#hum_controls .button.down").addEventListener("mousedown", (e) => {this.btnClick(e,'rel_hum_max',-1);});
+    document.querySelector("#hum_controls .button.up").addEventListener("mousedown", (e) => {this.btnClick(e,'hum_max',1);});
+    document.querySelector("#hum_controls .button.down").addEventListener("mousedown", (e) => {this.btnClick(e,'hum_max',-1);});
 
     document.querySelector("#temp_controls .weather_checkbox .checkbox.value").addEventListener("change", (e) => {this.btnClick(e,'show_weather_temp_value',e.target.checked);});
     document.querySelector("#temp_controls .weather_checkbox .checkbox.graph").addEventListener("change", (e) => {this.btnClick(e,'show_weather_temp_graph',e.target.checked);});
     document.querySelector("#hum_controls .weather_checkbox .checkbox.value").addEventListener("change", (e) => {this.btnClick(e,'show_weather_hum_value',e.target.checked);});
     document.querySelector("#hum_controls .weather_checkbox .checkbox.graph").addEventListener("change", (e) => {this.btnClick(e,'show_weather_hum_graph',e.target.checked);});
+  }
+
+  btnClick(e,param,amount) {
+    if (param === "hum_max") {
+      param = this.data.hum.abs ? 'abs_hum_max' : 'rel_hum_max';
+    }
+
+    super.btnClick(e, param, amount);
   }
 }

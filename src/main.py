@@ -353,7 +353,7 @@ def thermostat_control():
         return msg
     
         # run the actual scene!!!
-    if old_settings is not None and not object_equals(new_settings,old_settings,blacklist=["show_weather_graph","show_weather_values","show_weather_temp","show_weather_hum","use_abs_humidity"]):
+    if old_settings is not None and not object_equals(new_settings,old_settings,blacklist=["show_weather_temp_value","show_weather_temp_graph","show_weather_hum_value","show_weather_hum_graph","use_abs_humidity"]):
         logger.debug(f"thermostat settings are DIFFERENT THAN before, so running thermostat scene...")
         home_automation.thermostat_scene()
     else :
