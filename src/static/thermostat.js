@@ -87,7 +87,7 @@ import ThermControls from './ThermControls.mjs';
 
 
     // then load data and settings from server
-    // console.log('fetching data');
+    console.log('fetching data from server');
     fetch('/thermostat_update')
     .then(async response => {
       if (response.ok) {
@@ -154,7 +154,10 @@ import ThermControls from './ThermControls.mjs';
       max: abs ? data.settings.abs_hum_max : data.settings.rel_hum_max,
       min: abs ? data.settings.abs_hum_min : data.settings.rel_hum_min,
       hyst: abs ? data.settings.abs_hum_hyst : data.settings.rel_hum_hyst,
-      units: abs ? "g/m³" : "%"
+      units: abs ? "g/m³" : "%",
+      incr_amt: abs ? .1 : 1,
+      decr_amt: abs ? -.1 : -1,
+      str: abs ? 'abs' : 'rel'
     }
 
     // console.log(JSON.stringify(data.current));
@@ -192,7 +195,7 @@ import ThermControls from './ThermControls.mjs';
     let tempRange = findValuesRangeInTimeRange(data.logged_sensor, "temp", startTime);
     minTemp = Math.min(minTemp, Math.floor(tempRange.min-1));
     maxTemp = Math.max(maxTemp, Math.ceil(tempRange.max+2));
-    let humRange = findValuesRangeInTimeRange(data.logged_sensor, data.hum.abs ? "abs_hum" : "rel_hum", startTime);
+    let humRange = findValuesRangeInTimeRange(data.logged_sensor, `${data.hum.str}_hum`, startTime);
     minHum = Math.min(minHum, Math.floor(humRange.min-1));
     maxHum = Math.max(maxHum, Math.ceil(humRange.max+2));
 
@@ -238,7 +241,7 @@ import ThermControls from './ThermControls.mjs';
     // if (data.settings.on) {
       // drawThreshold(graphCtx,data.settings.hum_max,currentValueStyles.humColor(0.7),minHum,maxHum);
       // drawThreshold(graphCtx,data.settings.temp_target,currentValueStyles.tempColor(0.6),minTemp,maxTemp);
-      drawThresholdLines(graphCtx, data.logged_sensor, data.hum.abs ? "abs_hum_max" : "rel_hum_max", currentValueStyles.humColor(0.7), minHum, maxHum, startTime, timeRange);
+      drawThresholdLines(graphCtx, data.logged_sensor, `${data.hum.str}_hum_max`, currentValueStyles.humColor(0.7), minHum, maxHum, startTime, timeRange);
       drawThresholdLines(graphCtx, data.logged_sensor, "temp_target", currentValueStyles.tempColor(0.6), minTemp, maxTemp, startTime, timeRange);
     // }
 
@@ -568,7 +571,7 @@ import ThermControls from './ThermControls.mjs';
 
         // if this event is turning the thermostat off, and we've previously saved an onPoint
         if (onPoint && label.match(/SET on to False/i)) {
-          console.log(`${date} :: SET on to False`);
+          // console.log(`${date} :: SET on to False`);
 
           // end current threshold line
           endLine(timeStr);
@@ -578,7 +581,7 @@ import ThermControls from './ThermControls.mjs';
         }
         // if this event is turning the thermostat on
         else if (label.match(/SET on to True/i)) {
-          console.log(`${date} :: SET on to True`);
+          // console.log(`${date} :: SET on to True`);
           
           // save new onPoint
           onPoint = parseInt(timeStr);
@@ -601,7 +604,7 @@ import ThermControls from './ThermControls.mjs';
             // if the param change is for the param we're currently drawing
             // and the thermostat was on at this point
             if (entryParam === param && onPoint) {
-              console.log(`${date} :: ${m.toString()}`);
+              // console.log(`${date} :: ${m.toString()}`);
               // end the current line and start a new one
               endLine(timeStr);
               startLine(timeStr);
@@ -619,7 +622,7 @@ import ThermControls from './ThermControls.mjs';
     ctx.setLineDash([]);
 
     function startLine(timeStr) {
-      console.log(`- - - - - - - starting new line at ${val} on ${date}`);
+      // console.log(`- - - - - - - starting new line at ${val} on ${date}`);
       let timestamp = parseInt(timeStr);
 
       y = graphHeight * (1 - (val - minVal) / (maxVal - minVal));
@@ -635,12 +638,12 @@ import ThermControls from './ThermControls.mjs';
     }
 
     function endLine(timeStr) {
-      console.log(`- - - - - - - - ending old line at ${(1 - y/graphHeight)*(maxVal-minVal) + minVal} on ${date}`);
+      // console.log(`- - - - - - - - ending old line at ${(1 - y/graphHeight)*(maxVal-minVal) + minVal} on ${date}`);
       let timestamp = parseInt(timeStr);
 
       const x = graphWidth * (timestamp-startTime) / timeRange;
 
-      console.log(`ending line at x == ${x}`);
+      // console.log(`ending line at x == ${x}`);
 
       ctx.lineTo(x, y);
       ctx.stroke();
@@ -851,7 +854,8 @@ import ThermControls from './ThermControls.mjs';
   function updateCurrentValues(currentValues,humSettings) {
     document.querySelector("#current_values .indoor .temp.mainunits").innerHTML = currentValues.temp_f + "°";
     document.querySelector("#current_values .indoor .temp.altunits").innerHTML = currentValues.temp_c + "°";
-    document.querySelector("#current_values .indoor .hum").innerHTML = currentValues[humSettings.abs ? "abs_hum" : "rel_hum"] + (humSettings.abs ? `<span class="units_small">${humSettings.units}</span>` : humSettings.units);
+    document.querySelector("#current_values .indoor .hum.mainunits").innerHTML = currentValues[humSettings.abs ? "abs_hum" : "rel_hum"] + (humSettings.abs ? `<span class="units_small">${humSettings.units}</span>` : humSettings.units);
+    document.querySelector("#current_values .indoor .hum.altunits").innerHTML = currentValues[humSettings.abs ? "rel_hum" : "abs_hum"] + (humSettings.abs ? '%' : `<span class="units_small">${humSettings.units}</span>`);
   }
 
 

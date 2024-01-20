@@ -3,6 +3,8 @@ export default class Controls {
       this.data = data; // JSON data read from home-automation, with sensor history, weather data, settings, etc.
       this.ctrlChange = {}; // data should be an object, with key/value pairs corresponding with those in settings.json in the automation controller
       this.showing = false; // whether the controls are showing or hidden
+      this.deviceTabs = []; // optional device tabs for controlling individual or specific groups of devices
+      this.selectedTab; // name of currently selected tab (should be same as id of tab element)
 
       try { // get main canvas bounding rect and container element
         this.container = document.querySelector("#canvas_container");
@@ -16,6 +18,16 @@ export default class Controls {
       this.setOnOffSwitch();
       this.setElementSizes(); // set some sizes and positions of DOM elements
       this.setEvents(); // set mouse events on DOM objects
+      this.setInitialState(); // set any other initial state variables
+    }
+
+    setInitialState() {
+      // select first tab by default (deviceTabs array is filled in setEvents())
+      if (this.deviceTabs.length > 0) {
+        this.selectedTab = this.deviceTabs[0];
+      }
+
+      this.tabClick(null,this.selectedTab);
     }
   
     // get json data from home-automation;
@@ -62,7 +74,7 @@ export default class Controls {
       // using a small delay to allow multiple presses without submitting to the server for every single one;
       // if a delay is not passed or is out of range, use the default below
       if (!Number.isFinite(delay) || delay < 0 || delay > 10000) {
-        delay = 800;
+        delay = 1200;
       }
       this.saveDelay = setTimeout(() => {
         console.log(`this.ctrlChange == ${JSON.stringify(this.ctrlChange)}`);
@@ -108,13 +120,21 @@ export default class Controls {
         this.showControls(e);
       });
   
-      // clicking anywhere on the controls (except buttons) hides controls
+      // clicking anywhere on the controls (except buttons/tabs/switches) hides controls
       const controls = document.getElementById("controls_container");
       controls.addEventListener('mousedown', (e) => {
         this.hideControls(e);
       });
+
+      // device tabs
+      document.querySelectorAll("#device_tabs .tab.button").forEach(el => {
+        // add click event
+        el.addEventListener("mousedown", (e) => { this.tabClick(e, e.target.id); });
+        // add tab to master list of device tabs
+        this.deviceTabs.push(el.id);
+      });
   
-      // control buttons
+      // on/off switch
       document.querySelector("#onoff_switch .switch_outer").addEventListener("mousedown", (e) => {this.switchClick(e);});
 
       // a click on any input element should stop propagation (so the controls don't disappear)
@@ -132,7 +152,7 @@ export default class Controls {
   
       // auto hide the controls after so many seconds of inactivity
       clearTimeout(this.hideDelay);
-      this.hideDelay = setTimeout(this.hideControls,30000);
+      // this.hideDelay = setTimeout(this.hideControls,30000);
     }
   
     hideControls(e) {
@@ -142,7 +162,7 @@ export default class Controls {
     }
   
     btnClick(e,prop,input) {
-      // console.log(`Controls class has received a button click. Values are:\nprop==${JSON.stringify(prop)}, value==${input}`);
+      console.log(`Controls class has received a button click. Values are:\nprop==${JSON.stringify(prop)}, value==${input}`);
       e.stopPropagation(); // so that clicking it doesn't hide the controls view
   
       // we call showControls just to reset the hideDelay timer
@@ -159,6 +179,10 @@ export default class Controls {
           // top-level property
           if (typeof prop == "string") {
             this.ctrlChange[prop] = input + this.data.settings[prop];
+
+            if (!Number.isInteger(input)) {
+              this.ctrlChange[prop] = Math.round(this.ctrlChange[prop] * 1000) / 1000;
+            }
           }
         } 
         // otherwise, replace the old value with it
@@ -181,6 +205,30 @@ export default class Controls {
       // console.log(`typeof input === undefined: ${typeof input === "undefined"} (typeof input: ${typeof input})`);
 
       this.saveCtrlChange();
+    }
+
+    tabClick(e,id) {
+      if (e && e.stopPropagation) {
+        e.stopPropagation(); // so that clicking it doesn't hide the controls view
+      }
+
+      // we call showControls just to reset the hideDelay timer
+      // (if we're not already showing, don't call it,
+      // because tabClick is called (indirectly) from the constructor,
+      // before the controls are visible)
+      if (this.showing) {
+        this.showControls();
+      }
+
+      // unselect all tabs and select the one clicked on
+      document.querySelectorAll("#device_tabs .tab.button").forEach(el => {
+        el.classList.remove("selected");
+
+      });
+      document.getElementById(id).classList.add("selected");
+
+      this.selectedTab = id;
+
     }
   
     // when the user clicks on the master on/off switch
