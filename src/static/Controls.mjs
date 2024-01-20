@@ -152,7 +152,7 @@ export default class Controls {
   
       // auto hide the controls after so many seconds of inactivity
       clearTimeout(this.hideDelay);
-      // this.hideDelay = setTimeout(this.hideControls,30000);
+      this.hideDelay = setTimeout(this.hideControls,30000);
     }
   
     hideControls(e) {
