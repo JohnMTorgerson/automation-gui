@@ -25,9 +25,8 @@ export default class Controls {
       // select first tab by default (deviceTabs array is filled in setEvents())
       if (this.deviceTabs.length > 0) {
         this.selectedTab = this.deviceTabs[0];
+        this.tabClick(null, this.selectedTab);
       }
-
-      this.tabClick(null,this.selectedTab);
     }
   
     // get json data from home-automation;
