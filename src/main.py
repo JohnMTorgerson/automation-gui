@@ -14,8 +14,8 @@ import copy
 
 app = Flask(__name__)
 
-width=800
-height=480
+width=1024 #800
+height=600 #480
 home_auto_path = "../../home-automation/home_automation"
 
 # ====== MAIN SCREEN ====== #
@@ -47,6 +47,12 @@ def home():
             "property" : 'time',
             "bg" : ""
         },
+        "shades" : {
+            "route" : '/scenes/shades',
+            "update" : '/shades_update',
+            "property" : 'status',
+            "bg" : ""
+        }
     }
 
     return render_template('home.html', width=width, height=height, scenes=scenes)
@@ -378,6 +384,44 @@ def clock_update():
 
     return jsonify({"time" : time})
 
+# ====== SHADES SCENE ====== #
+
+# shades gui route
+@app.route('/scenes/shades')
+def shades():
+    logger.debug("====== Entering SHADES Scene ======")
+
+    return render_template('shades.html', name="Shades", width=width, height=height)
+
+# sunlight scene AJAX data request
+@app.route('/shades_update', methods=['POST', 'GET'])
+def shades_update():
+    # if request.method == "POST":
+    #     data = request.get_json()
+    #     logger.debug(data)
+
+    try:
+        with open(f"{home_auto_path}/scenes/shades/record.json", "r") as f :
+            shades_data = json.load(f)
+        results = shades_data
+    except Exception as e:
+        logger.error(repr(e))
+        results = {"error" : repr(e)}
+
+    return jsonify(results)
+
+# relay control changes back to the automation controller
+@app.route('/shades_control', methods=['POST'])
+def shades_control():
+    logger.debug("receiving shades control change from UI...")
+    ctrl_change = request.get_json()
+    logger.debug(f"updated settings requested by user:\n{json.dumps(ctrl_change)}")
+
+    # run the actual scene!!!
+    home_automation.shades_scene(ctrl_change["dir"])
+
+    return "success"
 
 if __name__ == '__main__':
    app.run(debug=False,use_reloader=True)
+

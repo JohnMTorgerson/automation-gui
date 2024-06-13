@@ -1,0 +1,29 @@
+{% extends "scene.html" %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='shades_style.css')}}">
+  <script type="module" src="{{url_for('static', filename='shades.js')}}" defer></script>
+
+  <script type="text/javascript">
+    const width = {{width}};
+    const height = {{height}};
+    const fontSize = height / 20;
+  </script>
+{% endblock %}
+
+{% block content %}
+    <div id="main_container" style="width:{{width}}px; height:{{height}}px;">
+        <div id="controls_container" class="controls">
+            <div id="onoff_switch">
+                <div class="switch_outer button">
+                    <div class="switch_inner"></div>
+                </div>
+            </div>
+            <div class="button_container">
+                <div class="button up"></div>
+                <div class="button down"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
