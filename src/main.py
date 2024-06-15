@@ -10,6 +10,8 @@ import home_automation
 from helpers import object_equals
 import copy
 
+from pprint import pprint
+
 # dir()
 
 app = Flask(__name__)
@@ -50,7 +52,7 @@ def home():
         "shades" : {
             "route" : '/scenes/shades',
             "update" : '/shades_update',
-            "property" : 'status',
+            "property" : 'current_state',
             "bg" : ""
         }
     }

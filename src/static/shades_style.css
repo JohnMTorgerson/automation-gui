@@ -9,6 +9,10 @@ body {
     position: relative;
 }
 
+#nav {
+    z-index: 999; /* make sure nav is above control panel */
+}
+
 /* ------------------- CONTROLS ------------------ */
 
 
