@@ -21,6 +21,8 @@ import ShadesControls from './ShadesControls.mjs';
   // const font4 = "DeadCRT";
   const font5 = "WarGames";
 
+  const currentStateEl = document.querySelector('#current_state');
+
   
   // set sizes
   setElementSizes();
@@ -121,7 +123,32 @@ import ShadesControls from './ShadesControls.mjs';
     // update thresholds on control screen
     shadesCtrls.updateCtrls(data);
 
+    const movingUp = () => {
+      graphicEl.classList.add('movingup');
+      graphicEl.addEventListener("animationend", () => {
+        graphicEl.classList.remove('movingup');
+      }, {once: true});
+    }
+    const movingDown = () => {
+      graphicEl.classList.add('movingdown');
+      graphicEl.addEventListener("animationend", () => {
+        graphicEl.classList.remove('movingdown');
+      }, {once: true});
+    }
 
+    currentStateEl.querySelector('.label').innerHTML = data.current_state;
+    let graphicEl = currentStateEl.querySelector('.graphic');
+
+    if (data.current_state === "up" && graphicEl.classList.contains('down')) {
+      movingUp();
+    }
+    if (data.current_state === "down" && graphicEl.classList.contains('up')) {
+      movingDown();
+    }
+
+    graphicEl.classList.remove('down');
+    graphicEl.classList.remove('up');
+    graphicEl.classList.add(data.current_state);
   }
 
 

@@ -14,6 +14,14 @@
 
 {% block content %}
     <div id="main_container" style="width:{{width}}px; height:{{height}}px;">
+        <div id="current_state">
+            <div class="label"></div>
+            <div class="graphic">
+                <div id="gph_top" class="gph_inner"></div>
+                <div id="gph_mid" class="gph_inner"></div>
+                <div id="gph_btm" class="gph_inner"></div>
+            </div>
+        </div>
         <div id="controls_container" class="controls">
             <div id="onoff_switch">
                 <div class="switch_outer button">

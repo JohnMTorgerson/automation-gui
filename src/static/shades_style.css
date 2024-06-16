@@ -7,11 +7,115 @@ body {
 
 #main_container {
     position: relative;
+    --font_size: 60px;
+    --maincolor: rgba(92, 178, 255, 1);
+    /*rgba(112,156,255,1);*/
+    --maincolor_faded: rgba(112, 156, 255, .5);
+    font-size: var(--font_size);
 }
 
 #nav {
     z-index: 999; /* make sure nav is above control panel */
 }
+
+#current_state {
+    color: var(--maincolor);
+    font-family: "WarGames";
+    width: 60%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    align-content: center;
+}
+
+#current_state .label {
+    font-size: 2em;
+    padding-top: 20px;
+}
+
+#current_state .graphic {
+    --width: 300px;
+    width: var(--width);
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    row-gap: 8px;
+
+    --anim-dur: 20s;
+}
+
+:root {
+    --up-height: 60px;
+    --dn-height: 350px;
+}
+
+#current_state .graphic.down {
+    height: var(--dn-height);
+}
+
+#current_state .graphic.up {
+    height: var(--up-height);
+}
+
+#current_state .graphic .gph_inner {
+    border-radius: 20px;
+    background-color: var(--maincolor);
+}
+
+#current_state .graphic #gph_top {
+    height: 25px;
+}
+
+#current_state .graphic #gph_mid {
+    flex-grow: 1;
+    margin-left: 10px;
+    margin-right: 10px;
+    border-radius: 0;
+    background-color: transparent;
+    background-image: linear-gradient(var(--maincolor_faded) 60%, transparent 60%, transparent 100%);
+    background-size: 100% 20px;
+    background-repeat: repeat-y;
+}
+
+#current_state .graphic #gph_btm {
+    height: 15px;
+}
+
+#current_state .graphic {
+    --anim-dur: 20s;
+}
+
+/* moving DOWN */
+#current_state .graphic.movingdown {
+  animation-duration: var(--anim-dur);
+  animation-name: moving;
+  animation-iteration-count: 1;
+  animation-direction: normal;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+/* moving UP */
+#current_state .graphic.movingup {
+    animation-duration: var(--anim-dur);
+    animation-name: moving;
+    animation-iteration-count: 1;
+    animation-direction: reverse;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+  
+@keyframes moving {
+  0% {
+    height: var(--up-height);
+  }  
+  100% {
+    height: var(--dn-height);
+  }
+}
+
 
 /* ------------------- CONTROLS ------------------ */
 
@@ -19,10 +123,6 @@ body {
 #controls_container {
     visibility: visible !important;
 
-    --font_size: 60px;
-    --maincolor: rgba(92, 178, 255, 1);
-    /*rgba(112,156,255,1);*/
-    --maincolor_faded: rgba(112, 156, 255, .5);
 /*    background-color: rgba(0, 0, 0, 0.8);
     text-shadow: 0 0 1.3em black,
         0 0 .8em black,
@@ -30,18 +130,20 @@ body {
     font-size: var(--font_size);
     background-color: transparent !important;
 
+    width: 40% !important;
+    left: 60%;
+
     /* display: grid;
     grid-template-areas: "current current"
                          "buttons buttons"; */
 
     display: flex;
-
     flex-direction: column;
     gap: 0.3em;
     padding: 0.3em;
     justify-content: center;
     align-items: center;
-    align-content: center;
+    align-content: start;
 }
 
 .button_container {
@@ -51,11 +153,11 @@ body {
     font-size: 0.8em;
 }
 
-.current {
+/* .current {
     grid-area: current;
     font-size: 1.2em;
     width: 4.5em;
-}
+} */
 
 
 #onoff_switch {
