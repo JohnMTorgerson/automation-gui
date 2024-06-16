@@ -71,7 +71,7 @@ body {
 }
 
 #scenes {
-  --min: 5em;
+  --min: 7em;
   /* display: flex;
   flex-wrap: wrap;
   justify-content: space-evenly;
