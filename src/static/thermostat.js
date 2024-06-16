@@ -193,8 +193,8 @@ import ThermControls from './ThermControls.mjs';
 
     // then expand the ranges as needed based on the values that appear in the data in our time range
     let tempRange = findValuesRangeInTimeRange(data.logged_sensor, "temp", startTime);
-    minTemp = Math.min(minTemp, Math.floor(tempRange.min-1));
-    maxTemp = Math.max(maxTemp, Math.ceil(tempRange.max+2));
+    minTemp = Math.min(minTemp, Math.floor(tempRange.min-2));
+    maxTemp = Math.max(maxTemp, Math.ceil(tempRange.max+3));
     let humRange = findValuesRangeInTimeRange(data.logged_sensor, `${data.hum.str}_hum`, startTime);
     minHum = Math.min(minHum, Math.floor(humRange.min-1));
     maxHum = Math.max(maxHum, Math.ceil(humRange.max+2));

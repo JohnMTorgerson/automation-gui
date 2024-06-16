@@ -34,7 +34,7 @@ import ShadesControls from './ShadesControls.mjs';
 
   // dynamically load scene data from flask server
   window.fetchAndSaveData = async function (changed) {
-    // first, if a change was made (e.g. the user changed the temp threshold through the UI)
+    // first, if a change was made (e.g. the user changed something through the UI)
     // since the server was last polled, we need to update the server with the changes
     // before getting updated data from it
     if (changed) {
