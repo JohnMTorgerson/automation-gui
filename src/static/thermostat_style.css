@@ -96,8 +96,9 @@ canvas {
 #current_values .indoor > div {
   --margin: 10px;
   box-sizing: border-box;
-  padding-top: .3em;
+  padding-top: .4em;
   margin: var(--margin);
+  text-wrap: nowrap;
 }
 
 #current_values .indoor .temp {

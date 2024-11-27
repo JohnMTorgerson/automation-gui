@@ -183,13 +183,13 @@ import ThermControls from './ThermControls.mjs';
     let maxHum = maxHumExtreme;
 
 
-    // if the thermostat is on, set the initial range based on the thermostat settings for temp and humidity
-    if (data.settings.on) {
-      maxTemp = data.settings.temp_target + 3;//81;
-      minTemp = data.settings.temp_target - data.settings.temp_hyst - 3;//74;
-      maxHum = data.hum.max + (data.hum.abs ? 0.5 : 3);//41;
-      minHum = data.hum.max - data.hum.hyst - (data.hum.abs ? 0.5 : 3);//34;
-    }
+    // // if the thermostat is on, set the initial range based on the thermostat settings for temp and humidity
+    // if (data.settings.on) {
+    //   maxTemp = data.settings.temp_target + 3;//81;
+    //   minTemp = data.settings.temp_target - data.settings.temp_hyst - 3;//74;
+    //   maxHum = data.hum.max + (data.hum.abs ? 0.5 : 3);//41;
+    //   minHum = data.hum.max - data.hum.hyst - (data.hum.abs ? 0.5 : 3);//34;
+    // }
 
     // then expand the ranges as needed based on the values that appear in the data in our time range
     let tempRange = findValuesRangeInTimeRange(data.logged_sensor, "temp", startTime);
