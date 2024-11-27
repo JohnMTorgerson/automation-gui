@@ -84,7 +84,7 @@ body {
 }
 
 #current_state .graphic {
-    --anim-dur: 20s;
+    --anim-dur: 3s;
 }
 
 /* moving DOWN */
